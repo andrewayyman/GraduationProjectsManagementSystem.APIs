@@ -1,5 +1,5 @@
 ﻿using Domain.Entities.Identity;
-using Graduation_Project_Management.DTOs;
+using Graduation_Project_Management.DTOs.AuthDTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -19,6 +19,8 @@ namespace Graduation_Project_Management.Controllers
             _userManager = userManager;
             _roleManager = roleManager;
         }
+
+        #region Assign-Roles
 
         [Authorize(Roles = "Admin")]
         [HttpPost("assign-role")]
@@ -41,5 +43,7 @@ namespace Graduation_Project_Management.Controllers
 
             return Ok(new { message = $"Role '{model.Role}' assigned to user '{model.UserName}'" });
         }
+
+        #endregion Assign-Roles
     }
 }

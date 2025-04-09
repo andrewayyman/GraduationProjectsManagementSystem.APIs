@@ -1,6 +1,6 @@
 ﻿using Domain.Entities.Identity;
 using Domain.Services;
-using Graduation_Project_Management.DTOs;
+using Graduation_Project_Management.DTOs.AuthDTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +21,8 @@ namespace Graduation_Project_Management.Controllers
             _signInManager = signInManager;
             _tokenService = tokenService;
         }
+
+        #region Register
 
         [HttpPost("Register")]
         public async Task<ActionResult<UserDto>> Register( RegisterDto model )
@@ -43,6 +45,10 @@ namespace Graduation_Project_Management.Controllers
             return Ok(returnedUser);
         }
 
+        #endregion Register
+
+        #region Login
+
         [HttpPost("Login")]
         public async Task<ActionResult<UserDto>> Login( LoginDto model )
         {
@@ -58,5 +64,7 @@ namespace Graduation_Project_Management.Controllers
             };
             return Ok(returnedUser);
         }
+
+        #endregion Login
     }
 }
