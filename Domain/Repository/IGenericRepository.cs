@@ -12,12 +12,10 @@ namespace Domain.Repository
 
         Task<T> GetByIdAsync( int id );
 
-        Task AddAsync( T entity );
+        Task<T> AddAsync( T entity );
 
-        void Update( T entity );
+        Task UpdateAsync( T entity );
 
-        void Delete( T entity );
-
-        Task<bool> SaveChangesAsync();
+        Task DeleteAsync( T entity );
     }
 }

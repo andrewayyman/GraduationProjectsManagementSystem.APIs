@@ -11,34 +11,44 @@ namespace Repository
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        public Task AddAsync( T entity )
+        private readonly ApplicationDbContext _dbContext;
+
+        public GenericRepository( ApplicationDbContext dbContext )
         {
-            throw new NotImplementedException();
+            _dbContext = dbContext;
         }
 
-        public void Delete( T entity )
+        #region Crud
+
+        public async Task<IEnumerable<T>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return await _dbContext.Set<T>().ToListAsync();
         }
 
-        public Task<IEnumerable<T>> GetAllAsync()
+        public async Task<T> GetByIdAsync( int id )
         {
-            throw new NotImplementedException();
+            return await _dbContext.Set<T>().FindAsync(id);
         }
 
-        public Task<T> GetByIdAsync( int id )
+        public async Task<T> AddAsync( T entity )
         {
-            throw new NotImplementedException();
+            await _dbContext.Set<T>().AddAsync(entity);
+            await _dbContext.SaveChangesAsync();
+            return entity;
         }
 
-        public Task<bool> SaveChangesAsync()
+        public async Task UpdateAsync( T entity )
         {
-            throw new NotImplementedException();
+            _dbContext.Set<T>().Update(entity);
+            await _dbContext.SaveChangesAsync();
         }
 
-        public void Update( T entity )
+        public async Task DeleteAsync( T entity )
         {
-            throw new NotImplementedException();
+            _dbContext.Remove(entity);
+            await _dbContext.SaveChangesAsync();
         }
+
+        #endregion Crud
     }
 }
