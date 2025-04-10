@@ -3,20 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Repository.Identity;
 
 #nullable disable
 
-namespace Repository.Identity.Migrations
+namespace Repository.Migrations
 {
-    [DbContext(typeof(AppIdentityContext))]
-    [Migration("20250410181354_InitialCreate")]
-    partial class InitialCreate
+    [DbContext(typeof(ApplicationDbContext))]
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -136,7 +133,7 @@ namespace Repository.Identity.Migrations
 
                     b.HasIndex("TeamId");
 
-                    b.ToTable("ProjectIdea");
+                    b.ToTable("ProjectIdeas");
                 });
 
             modelBuilder.Entity("Domain.Entities.Student", b =>
@@ -234,7 +231,6 @@ namespace Repository.Identity.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("PhoneNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.PrimitiveCollection<string>("PreferredTechnologies")
@@ -297,7 +293,7 @@ namespace Repository.Identity.Migrations
 
                     b.HasIndex("TeamId");
 
-                    b.ToTable("Task");
+                    b.ToTable("Tasks");
                 });
 
             modelBuilder.Entity("Domain.Entities.Team", b =>
@@ -334,7 +330,7 @@ namespace Repository.Identity.Migrations
 
                     b.HasIndex("SupervisorId");
 
-                    b.ToTable("Team");
+                    b.ToTable("Teams");
                 });
 
             modelBuilder.Entity("Domain.Entities.TeamJoinRequest", b =>
@@ -366,7 +362,7 @@ namespace Repository.Identity.Migrations
 
                     b.HasIndex("TeamId");
 
-                    b.ToTable("TeamJoinRequest");
+                    b.ToTable("TeamJoinRequests");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

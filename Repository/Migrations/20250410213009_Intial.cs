@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Repository.Identity.Migrations
+namespace Repository.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Intial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -167,7 +167,7 @@ namespace Repository.Identity.Migrations
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Department = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ProfilePictureUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     MaxAssignedTeams = table.Column<int>(type: "int", nullable: false),
@@ -186,7 +186,7 @@ namespace Repository.Identity.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Team",
+                name: "Teams",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -201,16 +201,16 @@ namespace Repository.Identity.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Team", x => x.Id);
+                    table.PrimaryKey("PK_Teams", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Team_Supervisors_SupervisorId",
+                        name: "FK_Teams_Supervisors_SupervisorId",
                         column: x => x.SupervisorId,
                         principalTable: "Supervisors",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProjectIdea",
+                name: "ProjectIdeas",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -225,17 +225,17 @@ namespace Repository.Identity.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProjectIdea", x => x.Id);
+                    table.PrimaryKey("PK_ProjectIdeas", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProjectIdea_Supervisors_SupervisorId",
+                        name: "FK_ProjectIdeas_Supervisors_SupervisorId",
                         column: x => x.SupervisorId,
                         principalTable: "Supervisors",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProjectIdea_Team_TeamId",
+                        name: "FK_ProjectIdeas_Teams_TeamId",
                         column: x => x.TeamId,
-                        principalTable: "Team",
+                        principalTable: "Teams",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -272,14 +272,14 @@ namespace Repository.Identity.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Students_Team_TeamId",
+                        name: "FK_Students_Teams_TeamId",
                         column: x => x.TeamId,
-                        principalTable: "Team",
+                        principalTable: "Teams",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "Task",
+                name: "Tasks",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -295,28 +295,28 @@ namespace Repository.Identity.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Task", x => x.Id);
+                    table.PrimaryKey("PK_Tasks", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Task_Students_AssignedStudentId",
+                        name: "FK_Tasks_Students_AssignedStudentId",
                         column: x => x.AssignedStudentId,
                         principalTable: "Students",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Task_Supervisors_SupervisorId",
+                        name: "FK_Tasks_Supervisors_SupervisorId",
                         column: x => x.SupervisorId,
                         principalTable: "Supervisors",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Task_Team_TeamId",
+                        name: "FK_Tasks_Teams_TeamId",
                         column: x => x.TeamId,
-                        principalTable: "Team",
+                        principalTable: "Teams",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "TeamJoinRequest",
+                name: "TeamJoinRequests",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -329,17 +329,17 @@ namespace Repository.Identity.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TeamJoinRequest", x => x.Id);
+                    table.PrimaryKey("PK_TeamJoinRequests", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TeamJoinRequest_Students_StudentId",
+                        name: "FK_TeamJoinRequests_Students_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Students",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_TeamJoinRequest_Team_TeamId",
+                        name: "FK_TeamJoinRequests_Teams_TeamId",
                         column: x => x.TeamId,
-                        principalTable: "Team",
+                        principalTable: "Teams",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -384,13 +384,13 @@ namespace Repository.Identity.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProjectIdea_SupervisorId",
-                table: "ProjectIdea",
+                name: "IX_ProjectIdeas_SupervisorId",
+                table: "ProjectIdeas",
                 column: "SupervisorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProjectIdea_TeamId",
-                table: "ProjectIdea",
+                name: "IX_ProjectIdeas_TeamId",
+                table: "ProjectIdeas",
                 column: "TeamId");
 
             migrationBuilder.CreateIndex(
@@ -411,34 +411,34 @@ namespace Repository.Identity.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Task_AssignedStudentId",
-                table: "Task",
+                name: "IX_Tasks_AssignedStudentId",
+                table: "Tasks",
                 column: "AssignedStudentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Task_SupervisorId",
-                table: "Task",
+                name: "IX_Tasks_SupervisorId",
+                table: "Tasks",
                 column: "SupervisorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Task_TeamId",
-                table: "Task",
+                name: "IX_Tasks_TeamId",
+                table: "Tasks",
                 column: "TeamId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Team_SupervisorId",
-                table: "Team",
-                column: "SupervisorId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TeamJoinRequest_StudentId",
-                table: "TeamJoinRequest",
+                name: "IX_TeamJoinRequests_StudentId",
+                table: "TeamJoinRequests",
                 column: "StudentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TeamJoinRequest_TeamId",
-                table: "TeamJoinRequest",
+                name: "IX_TeamJoinRequests_TeamId",
+                table: "TeamJoinRequests",
                 column: "TeamId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Teams_SupervisorId",
+                table: "Teams",
+                column: "SupervisorId");
         }
 
         /// <inheritdoc />
@@ -460,13 +460,13 @@ namespace Repository.Identity.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "ProjectIdea");
+                name: "ProjectIdeas");
 
             migrationBuilder.DropTable(
-                name: "Task");
+                name: "Tasks");
 
             migrationBuilder.DropTable(
-                name: "TeamJoinRequest");
+                name: "TeamJoinRequests");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -475,7 +475,7 @@ namespace Repository.Identity.Migrations
                 name: "Students");
 
             migrationBuilder.DropTable(
-                name: "Team");
+                name: "Teams");
 
             migrationBuilder.DropTable(
                 name: "Supervisors");

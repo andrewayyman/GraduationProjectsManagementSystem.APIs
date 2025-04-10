@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Graduation Project Management",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Graduation_Project_Management/bin/Debug/net8.0/Graduation_Project_Management.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Graduation_Project_Management",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        }
+    ]
+} 

@@ -9,11 +9,11 @@ using Repository.Identity;
 
 #nullable disable
 
-namespace Repository.Identity.Migrations
+namespace Repository.Migrations
 {
-    [DbContext(typeof(AppIdentityContext))]
-    [Migration("20250410181935_MakePhoneNOptional")]
-    partial class MakePhoneNOptional
+    [DbContext(typeof(ApplicationDbContext))]
+    [Migration("20250410213009_Intial")]
+    partial class Intial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -136,7 +136,7 @@ namespace Repository.Identity.Migrations
 
                     b.HasIndex("TeamId");
 
-                    b.ToTable("ProjectIdea");
+                    b.ToTable("ProjectIdeas");
                 });
 
             modelBuilder.Entity("Domain.Entities.Student", b =>
@@ -296,7 +296,7 @@ namespace Repository.Identity.Migrations
 
                     b.HasIndex("TeamId");
 
-                    b.ToTable("Task");
+                    b.ToTable("Tasks");
                 });
 
             modelBuilder.Entity("Domain.Entities.Team", b =>
@@ -333,7 +333,7 @@ namespace Repository.Identity.Migrations
 
                     b.HasIndex("SupervisorId");
 
-                    b.ToTable("Team");
+                    b.ToTable("Teams");
                 });
 
             modelBuilder.Entity("Domain.Entities.TeamJoinRequest", b =>
@@ -365,7 +365,7 @@ namespace Repository.Identity.Migrations
 
                     b.HasIndex("TeamId");
 
-                    b.ToTable("TeamJoinRequest");
+                    b.ToTable("TeamJoinRequests");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

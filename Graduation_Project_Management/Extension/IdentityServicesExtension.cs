@@ -22,7 +22,7 @@ namespace Graduation_Project_Management.Extension
                 options.Password.RequireUppercase = false;
                 options.Password.RequiredLength = 6;
             })
-               .AddEntityFrameworkStores<AppIdentityContext>();
+               .AddEntityFrameworkStores<ApplicationDbContext>();
             Services.AddAuthentication(Options=>
             {
                 Options.DefaultAuthenticateScheme=JwtBearerDefaults.AuthenticationScheme;

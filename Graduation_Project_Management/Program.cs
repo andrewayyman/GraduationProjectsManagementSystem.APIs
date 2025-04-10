@@ -21,7 +21,7 @@ namespace Graduation_Project_Management
             builder.Services.AddSwaggerGen();
 
             // IdentityDatasbase Connection
-            builder.Services.AddDbContext<AppIdentityContext>(Options =>
+            builder.Services.AddDbContext<ApplicationDbContext>(Options =>
             {
                 Options.UseSqlServer(builder.Configuration.GetConnectionString("IdentitySQLConnection"));
             });
@@ -42,7 +42,7 @@ namespace Graduation_Project_Management
             var loggerFactory = services.GetRequiredService<ILoggerFactory>();
             try
             {
-                var Dbcontext = services.GetRequiredService<AppIdentityContext>();
+                var Dbcontext = services.GetRequiredService<ApplicationDbContext>();
                 await Dbcontext.Database.MigrateAsync();
 
                 var UserManger = services.GetRequiredService<UserManager<AppUser>>();
@@ -67,9 +67,9 @@ namespace Graduation_Project_Management
             }
 
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
             app.UseAuthentication();
             app.UseAuthorization();
-
             app.MapControllers();
 
             #endregion Middlewares

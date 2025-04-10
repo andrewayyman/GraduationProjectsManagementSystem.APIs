@@ -15,29 +15,31 @@ namespace Graduation_Project_Management.Controllers
     public class AccountController : ControllerBase
     {
         #region Dependencies
+
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly ITokenService _tokenService;
-        private readonly AppIdentityContext _appIdentityContext;
+        private readonly ApplicationDbContext _appIdentityContext;
 
-        public AccountController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, AppIdentityContext appIdentityContext)
+        public AccountController( UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, ApplicationDbContext appIdentityContext )
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;
             _appIdentityContext = appIdentityContext;
-        } 
-        #endregion
+        }
+
+        #endregion Dependencies
 
         #region Register
 
         [HttpPost("Register")]
-        public async Task<ActionResult<UserDto>> Register(RegisterDto model )
+        public async Task<ActionResult<UserDto>> Register( RegisterDto model )
         {
             var User = new AppUser()
             {
                 FirstName = model.FirstName,
-                LastName = model.LastName,  
+                LastName = model.LastName,
                 Email = model.Email,
                 PhoneNumber = model.PhoneNumber,
                 UserName = model.Email.Split('@')[0]
@@ -51,15 +53,13 @@ namespace Graduation_Project_Management.Controllers
             var student = new Student
             {
                 UserId = User.Id,
-                FirstName=User.FirstName,
-                LastName=User.LastName,
-                Email=User.Email,
-                PhoneNumber=User.PhoneNumber
-
+                FirstName = User.FirstName,
+                LastName = User.LastName,
+                Email = User.Email,
+                PhoneNumber = User.PhoneNumber
             };
             _appIdentityContext.Students.Add(student);
             await _appIdentityContext.SaveChangesAsync();
-
 
             var returnedUser = new UserDto()
             {

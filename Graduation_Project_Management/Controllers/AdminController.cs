@@ -18,26 +18,27 @@ namespace Graduation_Project_Management.Controllers
 
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly AppIdentityContext _appIdentityContext;
+        private readonly ApplicationDbContext _appIdentityContext;
         private readonly ITokenService _tokenService;
 
-        public AdminController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, AppIdentityContext appIdentityContext, ITokenService tokenService)
+        public AdminController( UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext appIdentityContext, ITokenService tokenService )
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _appIdentityContext = appIdentityContext;
             _tokenService = tokenService;
-        } 
-        #endregion
+        }
+
+        #endregion Dependencies
 
         #region Register_Supervisor
 
         [Authorize(Roles = "Admin")]
         [HttpPost("RegisterSupervisor")]
-        public async Task<ActionResult> RegisterSupervisor(RegisterSupervisorDto model)
+        public async Task<ActionResult> RegisterSupervisor( RegisterSupervisorDto model )
         {
             var existingUser = await _userManager.FindByEmailAsync(model.Email);
-            if (existingUser != null)
+            if ( existingUser != null )
                 return BadRequest("Email is already registered.");
 
             var supervisorUser = new AppUser
@@ -49,7 +50,7 @@ namespace Graduation_Project_Management.Controllers
             };
 
             var result = await _userManager.CreateAsync(supervisorUser, model.Password);
-            if (!result.Succeeded)
+            if ( !result.Succeeded )
                 return BadRequest(result.Errors);
 
             await _userManager.AddToRoleAsync(supervisorUser, "Supervisor");
@@ -57,8 +58,8 @@ namespace Graduation_Project_Management.Controllers
             var supervisor = new Supervisor
             {
                 UserId = supervisorUser.Id,
-                FirstName=supervisorUser.FirstName,
-                LastName=supervisorUser.LastName,
+                FirstName = supervisorUser.FirstName,
+                LastName = supervisorUser.LastName,
                 Email = supervisorUser.Email,
                 // Add any additional props
             };
@@ -74,9 +75,8 @@ namespace Graduation_Project_Management.Controllers
                 Token = await _tokenService.CreateTokenAsync(supervisorUser, _userManager)
             };
             return Ok(returnedUser);
-
         }
 
-        #endregion Assign-Roles
+        #endregion Register_Supervisor
     }
 }
