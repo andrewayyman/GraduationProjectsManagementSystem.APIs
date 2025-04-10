@@ -25,7 +25,7 @@ namespace Services
         {
             var AuthClaims=new List<Claim>()
             {
-                new Claim(ClaimTypes.GivenName,User.DisplayName),
+                new Claim(ClaimTypes.GivenName,User.FirstName),
                 new Claim(ClaimTypes.Email,User.Email),
             };
             var UserRoles = await userManager.GetRolesAsync(User);

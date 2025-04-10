@@ -23,9 +23,10 @@ namespace Repository.Identity
             {
                 var User = new AppUser()
                 {
-                    DisplayName = "Soma Ali",
-                    Email = "Somaali@Helwan.com",
-                    UserName = "smsoma",
+                    FirstName ="Super",
+                    LastName ="Admin",
+                    Email = "SuperAdmin@Helwan.com",
+                    UserName = "Admin",
                     PhoneNumber = "01111111111"
                 };
 

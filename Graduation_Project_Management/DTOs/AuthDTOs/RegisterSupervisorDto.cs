@@ -2,7 +2,7 @@
 
 namespace Graduation_Project_Management.DTOs.AuthDTOs
 {
-    public class RegisterDto
+    public class RegisterSupervisorDto
     {
         [Required]
         public string FirstName { get; set; }
@@ -12,11 +12,6 @@ namespace Graduation_Project_Management.DTOs.AuthDTOs
 
         [EmailAddress]
         public string Email { get; set; }
-
-        [Required]
-        [Phone]
-        public string PhoneNumber { get; set; }
-
         [Required]
         public string Password { get; set; }
     }

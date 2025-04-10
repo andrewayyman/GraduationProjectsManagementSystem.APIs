@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Entities.Identity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,10 +10,9 @@ namespace Domain.Entities
     public class Supervisor
     {
         public int Id { get; set; }                                                                    // unique id for the supervisor
-        public string UniversityId { get; set; }                                                       //  id for the supervisor in the university system
         public string FirstName { get; set; }                                                          // first name of the supervisor
         public string LastName { get; set; }                                                           // last name of the supervisor
-        public string? Email { get; set; }                                                             // email of the supervisor
+        public string Email { get; set; }                                                             // email of the supervisor
         public string? PhoneNumber { get; set; }                                                       // phone number of the supervisor
         public string? Department { get; set; }                                                        // department of the supervisor
         public string? ProfilePictureUrl { get; set; }                                                 // profile picture of the supervisor
@@ -21,6 +21,9 @@ namespace Domain.Entities
         public List<string> PreferredTechnologies { get; set; } = new();                               // list of technologies that the supervisor is familiar with
 
         // RelationShips
+
+        public string UserId { get; set; }
+        public AppUser User { get; set; }
 
         // one supervisor can have many teams, and one team can have one supervisor
         public ICollection<Team>? SupervisedTeams { get; set; } = new List<Team>();                    // teams supervised by the supervisor
