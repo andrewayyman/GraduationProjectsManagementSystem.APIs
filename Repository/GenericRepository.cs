@@ -11,46 +11,32 @@ namespace Repository
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        private readonly ApplicationDbContext _context;
-        private readonly DbSet<T> _dbSet;
-
-        public GenericRepository( ApplicationDbContext context )
+        public Task AddAsync( T entity )
         {
-            _context = context;
-            _dbSet = _context.Set<T>();
-        }
-
-        public async Task<IEnumerable<T>> GetAllAsync()
-        {
-            return await _dbSet.ToListAsync();
-        }
-
-        public async Task<T?> GetByIdAsync( object id )
-        {
-            return await _dbSet.FindAsync(id);
-        }
-
-        public async Task AddAsync( T entity )
-        {
-            await _dbSet.AddAsync(entity);
-        }
-
-        public void Update( T entity )
-        {
-            _dbSet.Update(entity);
+            throw new NotImplementedException();
         }
 
         public void Delete( T entity )
         {
-            _dbSet.Remove(entity);
+            throw new NotImplementedException();
         }
 
-        public async Task<bool> SaveChangesAsync()
+        public Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _context.SaveChangesAsync() > 0;
+            throw new NotImplementedException();
         }
 
         public Task<T> GetByIdAsync( int id )
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> SaveChangesAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update( T entity )
         {
             throw new NotImplementedException();
         }
