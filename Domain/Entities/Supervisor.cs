@@ -16,6 +16,8 @@ namespace Domain.Entities
         public string? PhoneNumber { get; set; }                                                       // phone number of the supervisor
         public string? Department { get; set; }                                                        // department of the supervisor
         public string? ProfilePictureUrl { get; set; }                                                 // profile picture of the supervisor
+        public int MaxAssignedTeams { get; set; } = 4;                                                 // max number of teams assigned to the supervisor
+
         public List<string> PreferredTechnologies { get; set; } = new();                               // list of technologies that the supervisor is familiar with
 
         // RelationShips

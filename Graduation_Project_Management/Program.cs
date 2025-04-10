@@ -57,6 +57,8 @@ namespace Graduation_Project_Management
 
             #endregion Update Database
 
+            #region Middlewares
+
             // Configure the HTTP request pipeline.
             if ( app.Environment.IsDevelopment() )
             {
@@ -69,6 +71,8 @@ namespace Graduation_Project_Management
             app.UseAuthorization();
 
             app.MapControllers();
+
+            #endregion Middlewares
 
             app.Run();
         }
