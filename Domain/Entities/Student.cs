@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Entities.Identity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,23 +11,26 @@ namespace Domain.Entities
     public class Student
     {
         public int Id { get; set; }
-        public string UniversityId { get; set; }                                                    // unique id for the student in the university system
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
-        public string Department { get; set; }
+        public string? Department { get; set; }
         public string? Level { get; set; }
         public double? Gpa { get; set; }
         public string? ProfilePictureUrl { get; set; }
 
-        public string MainRole { get; set; }                                                        // backend developer, front end developer, designer, etc.
+        public string? MainRole { get; set; }                                                        // backend developer, front end developer, designer, etc.
         public string? SecondaryRole { get; set; }
         public List<string>? TechStack { get; set; } = new List<string>();                          // list of technologies that the student is familiar with
         public string? GithubProfile { get; set; }                                                  // github profile of the student
         public string? LinkedInProfile { get; set; }
 
         // RelationShips
+
+        public string UserId { get; set; }
+        public AppUser User { get; set; }
+
 
         // one student can be in on team , teams can have many students
         public int? TeamId { get; set; }
