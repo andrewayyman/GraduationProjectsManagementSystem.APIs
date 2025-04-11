@@ -4,6 +4,7 @@ using Domain.Services;
 using Graduation_Project_Management.DTOs.AuthDTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Repository.Identity;
@@ -93,5 +94,10 @@ namespace Graduation_Project_Management.Controllers
         }
 
         #endregion Login
+
+       
+        
+
+
     }
 }
