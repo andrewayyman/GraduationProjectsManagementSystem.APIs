@@ -24,7 +24,7 @@ namespace Domain.Entities
 
         public Team Team { get; set; }                                                // team that the project idea belongs to
 
-        public int SupervisorId { get; set; }
-        public Supervisor Supervisor { get; set; }                                    // supervisor project idea Requested to
+        public ICollection<ProjectIdeaRequest> Requests { get; set; } = new List<ProjectIdeaRequest>();
+
     }
 }

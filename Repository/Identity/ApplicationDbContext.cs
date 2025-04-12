@@ -29,5 +29,7 @@ namespace Repository.Identity
         public DbSet<TeamJoinRequest> TeamJoinRequests { get; set; }
         public DbSet<Domain.Entities.Task> Tasks { get; set; }
         public DbSet<ProjectIdea> ProjectIdeas { get; set; }
+
+        public DbSet<ProjectIdeaRequest> ProjectIdeasRequest { get; set; }
     }
 }

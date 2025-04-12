@@ -32,6 +32,9 @@ namespace Domain.Entities
         public ICollection<ProjectIdea>? SupervisedProjects { get; set; } = new List<ProjectIdea>();   // projects supervised by the supervisor
 
         // one supervisor can create many tasks , and one task can have one supervisor
-        public ICollection<Task>? TasksCreated { get; set; } = new List<Task>();                       // tasks created by the supervisor
+        public ICollection<Task>? TasksCreated { get; set; } = new List<Task>();
+        // tasks created by the supervisor
+        public ICollection<ProjectIdeaRequest> ProjectIdeaRequests { get; set; } = new List<ProjectIdeaRequest>();
+
     }
 }

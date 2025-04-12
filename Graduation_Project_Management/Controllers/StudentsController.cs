@@ -73,8 +73,58 @@ namespace Graduation_Project_Management.Controllers
         }
         #endregion
 
-        #region Join Request
-        [HttpPost("JoinRequest")]
+        #region Delete Team
+        [HttpDelete("{teamId}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteTeam(int teamId)
+        {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+
+            var team = await _context.Teams
+                .Include(t => t.TeamMembers)
+                .FirstOrDefaultAsync(t => t.Id == teamId);
+
+            if (team == null)
+                return NotFound("Team not found");
+
+            // هل المستخدم عضو في الفريق؟
+            var isMember = team.TeamMembers.Any(m => m.Email == userEmail);
+            if (!isMember)
+                return StatusCode(StatusCodes.Status403Forbidden, "You are not part of this team");
+            _context.Teams.Remove(team);
+            await _context.SaveChangesAsync();
+
+            return Ok("Team deleted successfully");
+        }
+
+
+        #endregion
+
+        #region Get All Available Teams
+        [HttpGet("Available")]
+        public async Task<IActionResult> GetAvailableTeams()
+        {
+            var teams = await _context.Teams
+                .Include(t => t.TeamMembers)
+                .Where(t => t.TeamMembers.Count < 6)
+                .ToListAsync();
+
+            var result = teams.Select(t => new GetTeamsDto
+            {
+                Name = t.Name,
+                Description = t.Description,
+                TeamDepartment = t.TeamDepartment,
+                TechStack = t.TechStack,
+                MembersCount = t.TeamMembers.Count
+            });
+
+            return Ok(result);
+        }
+
+        #endregion
+
+        #region Join Team
+        [HttpPost("Join Team")]
         [Authorize(Roles = "Student")]
         public async Task<ActionResult> RequestToJoinTeam(TeamJoinRequestDto model)
         {
@@ -158,6 +208,7 @@ namespace Graduation_Project_Management.Controllers
         }
         #endregion
 
+        #region Respond to Join Requests
         [HttpPost("join-requests/{requestId}/respond")]
         [Authorize(Roles = "Student")]
         public async Task<ActionResult> RespondToJoinRequest(int requestId, [FromQuery] string decision)
@@ -204,6 +255,38 @@ namespace Graduation_Project_Management.Controllers
 
             return Ok(new { message = $" the request have been {request.Status} " });
         }
+        #endregion
+
+        #region Update Student Profile
+        [HttpPut("UpdateProfile")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> UpdateStudentProfile([FromBody] UpdateStudentProfileDto dto)
+        {
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+
+            var student = await _context.Students.FirstOrDefaultAsync(s => s.Email == userEmail);
+            if (student == null)
+                return NotFound("Student not found");
+
+            // التحديث
+            student.FirstName = dto.FirstName ?? student.FirstName;
+            student.LastName = dto.LastName ?? student.LastName;
+            student.PhoneNumber = dto.PhoneNumber ?? student.PhoneNumber;
+            student.Department = dto.Department ?? student.Department;
+            student.Gpa = dto.Gpa ?? student.Gpa;
+            student.TechStack = dto.TechStack ?? student.TechStack;
+            student.GithubProfile = dto.GitHubProfile ?? student.GithubProfile;
+            student.LinkedInProfile = dto.LinkedInProfile ?? student.LinkedInProfile;
+            student.MainRole= dto.MainRole ?? student.MainRole;
+            student.SecondaryRole = dto.SecondaryRole ?? student.SecondaryRole;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Profile updated successfully" });
+        }
+
+
+        #endregion
 
 
 
