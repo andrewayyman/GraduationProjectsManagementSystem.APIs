@@ -23,9 +23,9 @@ namespace Repository.Identity
             {
                 var User = new AppUser()
                 {
-                    FirstName ="Super",
-                    LastName ="Admin",
-                    Email = "SuperAdmin@Helwan.com",
+                    FirstName = "Super",
+                    LastName = "Admin",
+                    Email = "SuperAdmin@gmail.com",
                     UserName = "Admin",
                     PhoneNumber = "01111111111"
                 };

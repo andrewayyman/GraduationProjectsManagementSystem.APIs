@@ -26,5 +26,8 @@ namespace Domain.Entities
 
         public ICollection<ProjectIdeaRequest> Requests { get; set; } = new List<ProjectIdeaRequest>();
 
+        public int? SupervisorId { get; set; }
+
+        public Supervisor Supervisor { get; set; }
     }
 }

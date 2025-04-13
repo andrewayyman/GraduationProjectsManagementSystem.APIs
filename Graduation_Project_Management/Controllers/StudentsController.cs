@@ -24,34 +24,28 @@ namespace Graduation_Project_Management.Controllers
         private readonly IGenericRepository<Student> _studentRepo;
         private readonly ApplicationDbContext _context;
 
-        public StudentsController(UserManager<AppUser> userManager, IGenericRepository<Student> studentRepo,ApplicationDbContext applicationDbContext)
+        public StudentsController( UserManager<AppUser> userManager, IGenericRepository<Student> studentRepo, ApplicationDbContext applicationDbContext )
         {
             _userManager = userManager;
             _studentRepo = studentRepo;
             _context = applicationDbContext;
-
         }
-
-
 
         #endregion Dependencies
 
         #region Create team
+
         [HttpPost("Create")]
         [Authorize(Roles = "Student")]
-        public async Task<ActionResult> CreateTeam(TeamDto model)
+        public async Task<ActionResult> CreateTeam( TeamDto model )
         {
-
-
             // Get logged in user ID from JWT
             var userEmail = User.FindFirstValue(ClaimTypes.Email);
-
-
 
             // Find the student linked to this user
             var student = await _context.Students.FirstOrDefaultAsync(s => s.Email == userEmail);
 
-            if (student == null)
+            if ( student == null )
                 return NotFound("Student profile not found.");
 
             // Create new team
@@ -71,12 +65,14 @@ namespace Graduation_Project_Management.Controllers
 
             return Ok();
         }
-        #endregion
+
+        #endregion Create team
 
         #region Delete Team
+
         [HttpDelete("{teamId}")]
         [Authorize]
-        public async Task<IActionResult> DeleteTeam(int teamId)
+        public async Task<IActionResult> DeleteTeam( int teamId )
         {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
 
@@ -84,12 +80,12 @@ namespace Graduation_Project_Management.Controllers
                 .Include(t => t.TeamMembers)
                 .FirstOrDefaultAsync(t => t.Id == teamId);
 
-            if (team == null)
+            if ( team == null )
                 return NotFound("Team not found");
 
             // هل المستخدم عضو في الفريق؟
             var isMember = team.TeamMembers.Any(m => m.Email == userEmail);
-            if (!isMember)
+            if ( !isMember )
                 return StatusCode(StatusCodes.Status403Forbidden, "You are not part of this team");
             _context.Teams.Remove(team);
             await _context.SaveChangesAsync();
@@ -97,10 +93,10 @@ namespace Graduation_Project_Management.Controllers
             return Ok("Team deleted successfully");
         }
 
-
-        #endregion
+        #endregion Delete Team
 
         #region Get All Available Teams
+
         [HttpGet("Available")]
         public async Task<IActionResult> GetAvailableTeams()
         {
@@ -121,36 +117,37 @@ namespace Graduation_Project_Management.Controllers
             return Ok(result);
         }
 
-        #endregion
+        #endregion Get All Available Teams
 
         #region Join Team
+
         [HttpPost("Join Team")]
         [Authorize(Roles = "Student")]
-        public async Task<ActionResult> RequestToJoinTeam(TeamJoinRequestDto model)
+        public async Task<ActionResult> RequestToJoinTeam( TeamJoinRequestDto model )
         {
             var userEmail = User.FindFirstValue(ClaimTypes.Email);
 
-            if (userEmail == null)
+            if ( userEmail == null )
                 return Unauthorized();
 
             var student = await _context.Students.FirstOrDefaultAsync(s => s.Email == userEmail);
 
-            if (student == null)
+            if ( student == null )
                 return NotFound("Student profile not found.");
 
             var team = await _context.Teams
                 .Include(t => t.JoinRequests)
                 .FirstOrDefaultAsync(t => t.Id == model.TeamId);
 
-            if (team == null)
+            if ( team == null )
                 return NotFound("Team not found.");
 
             // Check if student already in the team
-            if (team.TeamMembers?.Any(m => m.Id == student.Id) == true)
+            if ( team.TeamMembers?.Any(m => m.Id == student.Id) == true )
                 return BadRequest("You are already a member of this team.");
 
             // Check if already requested
-            if (team.JoinRequests?.Any(r => r.StudentId == student.Id) == true)
+            if ( team.JoinRequests?.Any(r => r.StudentId == student.Id) == true )
                 return BadRequest("You already have a pending request to this team.");
 
             // Create request
@@ -168,12 +165,14 @@ namespace Graduation_Project_Management.Controllers
 
             return Ok(new { message = "Join request sent successfully." });
         }
-        #endregion
+
+        #endregion Join Team
 
         #region Get Join Requests
+
         [HttpGet("team/{teamId}/join-requests")]
         [Authorize(Roles = "Student")]
-        public async Task<ActionResult> GetTeamJoinRequests(int teamId)
+        public async Task<ActionResult> GetTeamJoinRequests( int teamId )
         {
             var userEmail = User.FindFirstValue(ClaimTypes.Email);
 
@@ -181,8 +180,7 @@ namespace Graduation_Project_Management.Controllers
                 .Include(s => s.Team)
                 .FirstOrDefaultAsync(s => s.Email == userEmail);
 
-
-            if (student?.TeamId != teamId)
+            if ( student?.TeamId != teamId )
                 return StatusCode(StatusCodes.Status403Forbidden, "You are not part of this team");
 
             var team = await _context.Teams
@@ -191,7 +189,7 @@ namespace Graduation_Project_Management.Controllers
                 .ThenInclude(s => s.User)
                 .FirstOrDefaultAsync(t => t.Id == teamId);
 
-            if (team == null)
+            if ( team == null )
                 return NotFound("Team not Found");
 
             var requests = team.JoinRequests?.Select(r => new
@@ -200,18 +198,20 @@ namespace Graduation_Project_Management.Controllers
                 r.StudentId,
                 StudentName = r.Student.User.UserName,
                 r.Message,
-                r.Status,
+                Status = Enum.GetName(typeof(JoinRequestStatus), r.Status),
                 r.CreatedAt
             }).ToList();
 
             return Ok(requests);
         }
-        #endregion
+
+        #endregion Get Join Requests
 
         #region Respond to Join Requests
+
         [HttpPost("join-requests/{requestId}/respond")]
         [Authorize(Roles = "Student")]
-        public async Task<ActionResult> RespondToJoinRequest(int requestId, [FromQuery] string decision)
+        public async Task<ActionResult> RespondToJoinRequest( int requestId, [FromQuery] string decision )
         {
             var userEmail = User.FindFirstValue(ClaimTypes.Email);
 
@@ -220,7 +220,7 @@ namespace Graduation_Project_Management.Controllers
                 .ThenInclude(t => t.TeamMembers)
                 .FirstOrDefaultAsync(s => s.Email == userEmail);
 
-            if (student?.Team == null)
+            if ( student?.Team == null )
                 return StatusCode(StatusCodes.Status403Forbidden, "You are not part of this team");
 
             var request = await _context.TeamJoinRequests
@@ -228,21 +228,21 @@ namespace Graduation_Project_Management.Controllers
                 .Include(r => r.Student)
                 .FirstOrDefaultAsync(r => r.Id == requestId);
 
-            if (request == null || request.TeamId != student.Team.Id)
+            if ( request == null || request.TeamId != student.Team.Id )
                 return NotFound("Cannot Find The Request");
 
-            if (request.Status != JoinRequestStatus.Pending)
+            if ( request.Status != JoinRequestStatus.Pending )
                 return BadRequest("You Request Already have been responded ");
 
-            if (decision.ToLower() == "accept")
+            if ( decision.ToLower() == "accept" )
             {
-                if (request.Team.TeamMembers?.Count >= request.Team.MaxMembers)
+                if ( request.Team.TeamMembers?.Count >= request.Team.MaxMembers )
                     return BadRequest("Team is Full");
 
                 request.Status = JoinRequestStatus.Accepted;
                 request.Team.TeamMembers.Add(request.Student);
             }
-            else if (decision.ToLower() == "reject")
+            else if ( decision.ToLower() == "reject" )
             {
                 request.Status = JoinRequestStatus.Rejected;
             }
@@ -255,17 +255,19 @@ namespace Graduation_Project_Management.Controllers
 
             return Ok(new { message = $" the request have been {request.Status} " });
         }
-        #endregion
+
+        #endregion Respond to Join Requests
 
         #region Update Student Profile
+
         [HttpPut("UpdateProfile")]
         [Authorize(Roles = "Student")]
-        public async Task<IActionResult> UpdateStudentProfile([FromBody] UpdateStudentProfileDto dto)
+        public async Task<IActionResult> UpdateStudentProfile( [FromBody] UpdateStudentProfileDto dto )
         {
             var userEmail = User.FindFirstValue(ClaimTypes.Email);
 
             var student = await _context.Students.FirstOrDefaultAsync(s => s.Email == userEmail);
-            if (student == null)
+            if ( student == null )
                 return NotFound("Student not found");
 
             // التحديث
@@ -277,7 +279,7 @@ namespace Graduation_Project_Management.Controllers
             student.TechStack = dto.TechStack ?? student.TechStack;
             student.GithubProfile = dto.GitHubProfile ?? student.GithubProfile;
             student.LinkedInProfile = dto.LinkedInProfile ?? student.LinkedInProfile;
-            student.MainRole= dto.MainRole ?? student.MainRole;
+            student.MainRole = dto.MainRole ?? student.MainRole;
             student.SecondaryRole = dto.SecondaryRole ?? student.SecondaryRole;
 
             await _context.SaveChangesAsync();
@@ -285,14 +287,6 @@ namespace Graduation_Project_Management.Controllers
             return Ok(new { message = "Profile updated successfully" });
         }
 
-
-        #endregion
-
-
-
-
+        #endregion Update Student Profile
     }
-
-
 }
-

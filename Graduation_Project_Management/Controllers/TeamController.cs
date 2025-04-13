@@ -18,23 +18,22 @@ namespace Graduation_Project_Management.Controllers
     public class TeamController : ControllerBase
 
     {
-
         #region MyRegion Dependencies
-       
+
         private readonly ApplicationDbContext _context;
 
-        public TeamController( ApplicationDbContext applicationDbContext)
+        public TeamController( ApplicationDbContext applicationDbContext )
         {
-           
             _context = applicationDbContext;
+        }
 
-        } 
-        #endregion
+        #endregion MyRegion Dependencies
 
         #region Publish Project Idea
+
         [HttpPost("PublishIdea")]
         [Authorize(Roles = "Student")]
-        public async Task<IActionResult> PublishProjectIdea([FromBody] PublishProjectIdeaDto dto)
+        public async Task<IActionResult> PublishProjectIdea( [FromBody] PublishProjectIdeaDto dto )
         {
             var userEmail = User.FindFirstValue(ClaimTypes.Email);
 
@@ -42,9 +41,8 @@ namespace Graduation_Project_Management.Controllers
                 .Include(s => s.Team)
                 .FirstOrDefaultAsync(s => s.Email == userEmail);
 
-            if (student == null || student.Team == null)
+            if ( student == null || student.Team == null )
                 return StatusCode(StatusCodes.Status403Forbidden, "You must be part of a team to publish a project idea.");
-
 
             var idea = new ProjectIdea
             {
@@ -63,12 +61,13 @@ namespace Graduation_Project_Management.Controllers
             return Ok(new { message = "Idea published successfully", ideaId = idea.Id });
         }
 
-        #endregion
+        #endregion Publish Project Idea
 
         #region Send Idea Request To Supervisor
+
         [HttpPost("RequestSupervisor")]
         [Authorize(Roles = "Student")]
-        public async Task<IActionResult> RequestSupervisorForIdea([FromBody] SendProjectIdeaRequestDto dto)
+        public async Task<IActionResult> RequestSupervisorForIdea( [FromBody] SendProjectIdeaRequestDto dto )
         {
             var userEmail = User.FindFirstValue(ClaimTypes.Email);
 
@@ -76,18 +75,17 @@ namespace Graduation_Project_Management.Controllers
                 .Include(s => s.Team)
                 .FirstOrDefaultAsync(s => s.Email == userEmail);
 
-            if (student?.Team == null)
+            if ( student?.Team == null )
                 return StatusCode(StatusCodes.Status403Forbidden, "You must be in a team.");
-
 
             var idea = await _context.ProjectIdeas
                 .FirstOrDefaultAsync(i => i.Id == dto.ProjectIdeaId && i.TeamId == student.Team.Id);
 
-            if (idea == null)
+            if ( idea == null )
                 return NotFound("Project idea not found");
 
             var supervisor = await _context.Supervisors.FindAsync(dto.SupervisorId);
-            if (supervisor == null)
+            if ( supervisor == null )
                 return NotFound("Supervisor not found");
 
             // أنشئ الريكوست
@@ -105,6 +103,6 @@ namespace Graduation_Project_Management.Controllers
             return Ok(new { message = "Request sent to supervisor" });
         }
 
-        #endregion
+        #endregion Send Idea Request To Supervisor
     }
 }
