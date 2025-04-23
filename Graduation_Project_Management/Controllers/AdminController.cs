@@ -1,5 +1,6 @@
 ﻿using Domain.Entities;
 using Domain.Entities.Identity;
+using Domain.Repository;
 using Domain.Services;
 using Graduation_Project_Management.DTOs.AuthDTOs;
 using Microsoft.AspNetCore.Authorization;
@@ -18,15 +19,16 @@ namespace Graduation_Project_Management.Controllers
 
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly ApplicationDbContext _appIdentityContext;
         private readonly ITokenService _tokenService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public AdminController( UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext appIdentityContext, ITokenService tokenService )
+
+        public AdminController( UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, ITokenService tokenService,IUnitOfWork unitOfWork )
         {
             _userManager = userManager;
             _roleManager = roleManager;
-            _appIdentityContext = appIdentityContext;
             _tokenService = tokenService;
+            _unitOfWork = unitOfWork;
         }
 
         #endregion Dependencies
@@ -64,8 +66,8 @@ namespace Graduation_Project_Management.Controllers
                 // Add any additional props
             };
 
-            _appIdentityContext.Supervisors.Add(supervisor);
-            await _appIdentityContext.SaveChangesAsync();
+            await _unitOfWork.GetRepository<Supervisor>().AddAsync(supervisor);
+
 
             var returnedUser = new UserDto()
             {

@@ -8,6 +8,7 @@ namespace Graduation_Project_Management.Extension
         public static IServiceCollection ApplicationServices(this IServiceCollection Services)
         {
             Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
             return Services;
         }
     }
