@@ -63,6 +63,7 @@ namespace Graduation_Project_Management.Controllers
             _context.Teams.Add(newTeam);
             await _context.SaveChangesAsync();
 
+
             return Ok();
         }
 

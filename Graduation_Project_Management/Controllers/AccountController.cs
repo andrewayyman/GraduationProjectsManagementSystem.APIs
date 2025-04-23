@@ -1,5 +1,6 @@
 ﻿using Domain.Entities;
 using Domain.Entities.Identity;
+using Domain.Repository;
 using Domain.Services;
 using Graduation_Project_Management.DTOs.AuthDTOs;
 using Microsoft.AspNetCore.Http;
@@ -20,14 +21,14 @@ namespace Graduation_Project_Management.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly ITokenService _tokenService;
-        private readonly ApplicationDbContext _appIdentityContext;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public AccountController( UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService, ApplicationDbContext appIdentityContext )
+        public AccountController( UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, ITokenService tokenService,  IUnitOfWork unitOfWork )
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;
-            _appIdentityContext = appIdentityContext;
+            _unitOfWork = unitOfWork;
         }
 
         #endregion Dependencies
@@ -59,8 +60,9 @@ namespace Graduation_Project_Management.Controllers
                 Email = User.Email,
                 PhoneNumber = User.PhoneNumber
             };
-            _appIdentityContext.Students.Add(student);
-            await _appIdentityContext.SaveChangesAsync();
+            //_appIdentityContext.Students.Add(student);
+            //await _appIdentityContext.SaveChangesAsync();
+            await _unitOfWork.GetRepository<Student>().AddAsync(student);
 
             var returnedUser = new UserDto()
             {
