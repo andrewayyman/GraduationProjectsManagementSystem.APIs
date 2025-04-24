@@ -12,7 +12,7 @@ namespace Graduation_Project_Management.DTOs.SupervisorDTOs
         public string? Department { get; set; }                                                        // department of the supervisor
         public string? ProfilePictureUrl { get; set; }                                                 // profile picture of the supervisor
         public int MaxAssignedTeams { get; set; } = 4;                                                 // max number of teams assigned to the supervisor
-        public List<string>? PreferredTechnologies { get; set; } = new();                               // list of technologies that the supervisor is familiar with
-        public ICollection<Team>? SupervisedTeams { get; set; } = new List<Team>();                    // teams supervised by the supervisor
+        public List<string>? PreferredTechnologies { get; set; }                      // list of technologies that the supervisor is familiar with
+        public ICollection<TeamDto>? SupervisedTeams { get; set; } = new List<TeamDto>();                    // teams supervised by the supervisor
     }
 }

@@ -10,6 +10,7 @@ using Graduation_Project_Management.DTOs.SupervisorDTOs;
 using Graduation_Project_Management.Errors;
 using System.Security.Claims;
 using Domain.Enums;
+using Graduation_Project_Management.DTOs;
 
 namespace Graduation_Project_Management.Controllers
 {
@@ -28,8 +29,6 @@ namespace Graduation_Project_Management.Controllers
             _supervisorRepo = supervisorRepo;
         }
 
-        // not fully implemented yet
-
         #region GetAllSupervisors
 
         [HttpGet]
@@ -45,15 +44,20 @@ namespace Graduation_Project_Management.Controllers
             {
                 Id = s.Id,
                 FirstName = s.FirstName,
+                LastName = s.LastName,
                 Email = s.Email,
                 PhoneNumber = s.PhoneNumber,
                 Department = s.Department,
                 ProfilePictureUrl = s.ProfilePictureUrl,
                 MaxAssignedTeams = s.MaxAssignedTeams,
-                //PreferredTechnologies  to be done
+                PreferredTechnologies = s.PreferredTechnologies,
                 SupervisedTeams = _context.Teams
                     .Where(t => t.SupervisorId == s.Id)
-                    .ToList(),
+                    .Select(t => new TeamDto
+                    {
+                        Name = t.Name,
+                        TechStack = t.TechStack
+                    }).ToList(),
             }).ToList();
 
             return Ok(ReturnedSupervisors);
@@ -82,10 +86,14 @@ namespace Graduation_Project_Management.Controllers
                 Department = supervisor.Department,
                 ProfilePictureUrl = supervisor.ProfilePictureUrl,
                 MaxAssignedTeams = supervisor.MaxAssignedTeams,
-                //PreferredTechnologies  to be done
+                PreferredTechnologies = supervisor.PreferredTechnologies,
                 SupervisedTeams = _context.Teams
                     .Where(t => t.SupervisorId == supervisor.Id)
-                    .ToList(),
+                    .Select(t => new TeamDto
+                    {
+                        Name = t.Name,
+                        TechStack = t.TechStack
+                    }).ToList(),
             };
 
             return Ok(ReturnedSupervisor);
@@ -110,6 +118,7 @@ namespace Graduation_Project_Management.Controllers
             supervisor.PhoneNumber = supervisorDto.PhoneNumber ?? supervisor.PhoneNumber;
             supervisor.Department = supervisorDto.Department ?? supervisor.Department;
             supervisor.ProfilePictureUrl = supervisorDto.ProfilePictureUrl ?? supervisor.ProfilePictureUrl;
+            supervisor.PreferredTechnologies = supervisorDto.PreferredTechnologies ?? supervisor.PreferredTechnologies;
             supervisor.MaxAssignedTeams = supervisorDto.MaxAssignedTeams;
 
             await _supervisorRepo.UpdateAsync(supervisor);
@@ -174,8 +183,6 @@ namespace Graduation_Project_Management.Controllers
 
         #endregion GetPendingRequests
 
-        // sometimes not get all [to be solved]
-
         #region GetMyTeams
 
         [HttpGet("GetMyTeams")]
@@ -211,8 +218,6 @@ namespace Graduation_Project_Management.Controllers
         }
 
         #endregion GetMyTeams
-
-        // change the status of request by given request id not project id [ to be solved ]
 
         #region HandleRequest
 

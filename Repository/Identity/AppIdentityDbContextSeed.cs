@@ -25,7 +25,7 @@ namespace Repository.Identity
                 {
                     FirstName = "Super",
                     LastName = "Admin",
-                    Email = "SuperAdmin@gmail.com",
+                    Email = "SuperAdmin@Helwan.com",
                     UserName = "Admin",
                     PhoneNumber = "01111111111"
                 };
