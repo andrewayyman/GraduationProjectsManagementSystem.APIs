@@ -60,9 +60,10 @@ namespace Graduation_Project_Management.Controllers
                 Email = User.Email,
                 PhoneNumber = User.PhoneNumber
             };
-            //_appIdentityContext.Students.Add(student);
-            //await _appIdentityContext.SaveChangesAsync();
+            
             await _unitOfWork.GetRepository<Student>().AddAsync(student);
+            await _unitOfWork.SaveChangesAsync();
+
 
             var returnedUser = new UserDto()
             {

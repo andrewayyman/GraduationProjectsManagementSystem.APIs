@@ -6,7 +6,6 @@
         public string? Description { get; set; }
         public string TeamDepartment { get; set; }
         public bool IsOpenToJoin { get; set; }
-        public int MaxMembers { get; set; }
         public List<string>? TechStack { get; set; }
     }
 }

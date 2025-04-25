@@ -3,6 +3,8 @@ using Domain.Entities.Identity;
 using Domain.Enums;
 using Domain.Repository;
 using Graduation_Project_Management.DTOs;
+using Graduation_Project_Management.IServices;
+using Graduation_Project_Management.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -18,91 +20,51 @@ namespace Graduation_Project_Management.Controllers
     public class TeamController : ControllerBase
 
     {
-        #region MyRegion Dependencies
+        #region  Dependencies
 
-        private readonly ApplicationDbContext _context;
+        private readonly ITeamService _teamService;
 
-        public TeamController( ApplicationDbContext applicationDbContext )
+        public TeamController( ITeamService teamService )
         {
-            _context = applicationDbContext;
+            _teamService = teamService;
         }
 
-        #endregion MyRegion Dependencies
+        #endregion  Dependencies     
 
-        #region Publish Project Idea
+        #region Create team
 
-        [HttpPost("PublishIdea")]
+        [HttpPost("Create")]
         [Authorize(Roles = "Student")]
-        public async Task<IActionResult> PublishProjectIdea( [FromBody] PublishProjectIdeaDto dto )
+        public async Task<IActionResult> CreateTeam([FromBody] TeamDto model)
         {
-            var userEmail = User.FindFirstValue(ClaimTypes.Email);
-
-            var student = await _context.Students
-                .Include(s => s.Team)
-                .FirstOrDefaultAsync(s => s.Email == userEmail);
-
-            if ( student == null || student.Team == null )
-                return StatusCode(StatusCodes.Status403Forbidden, "You must be part of a team to publish a project idea.");
-
-            var idea = new ProjectIdea
-            {
-                Title = dto.Title,
-                Description = dto.Description,
-                TechStack = dto.TechStack,
-                TeamId = student.Team.Id,
-                CreatedAt = DateTime.UtcNow,
-                Status = ProjectIdeaStatus.Pending
-                // SupervisorId is not assigned yet
-            };
-
-            _context.ProjectIdeas.Add(idea);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Idea published successfully", ideaId = idea.Id });
+            return await _teamService.CreateTeamAsync(User, model);
         }
 
-        #endregion Publish Project Idea
+        #endregion Create team
 
-        #region Send Idea Request To Supervisor
+        #region Delete Team
 
-        [HttpPost("RequestSupervisor")]
-        [Authorize(Roles = "Student")]
-        public async Task<IActionResult> RequestSupervisorForIdea( [FromBody] SendProjectIdeaRequestDto dto )
+        [HttpDelete("{teamId}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteTeam(int teamId)
         {
-            var userEmail = User.FindFirstValue(ClaimTypes.Email);
-
-            var student = await _context.Students
-                .Include(s => s.Team)
-                .FirstOrDefaultAsync(s => s.Email == userEmail);
-
-            if ( student?.Team == null )
-                return StatusCode(StatusCodes.Status403Forbidden, "You must be in a team.");
-
-            var idea = await _context.ProjectIdeas
-                .FirstOrDefaultAsync(i => i.Id == dto.ProjectIdeaId && i.TeamId == student.Team.Id);
-
-            if ( idea == null )
-                return NotFound("Project idea not found");
-
-            var supervisor = await _context.Supervisors.FindAsync(dto.SupervisorId);
-            if ( supervisor == null )
-                return NotFound("Supervisor not found");
-
-            // أنشئ الريكوست
-            var request = new ProjectIdeaRequest
-            {
-                ProjectIdeaId = idea.Id,
-                SupervisorId = dto.SupervisorId,
-                Status = ProjectIdeaStatus.Pending,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.ProjectIdeasRequest.Add(request);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Request sent to supervisor" });
+            return await _teamService.DeleteTeamAsync(User, teamId);
         }
 
-        #endregion Send Idea Request To Supervisor
+        #endregion Delete Team
+
+        #region Get All
+
+        [HttpGet("Available")]
+        public async Task<IActionResult> GetAvailableTeams()
+        {
+            return await _teamService.GetAvailableTeamsAsync();
+        }
+
+        #endregion Get All Available Teams
+
+       
+
+
     }
 }

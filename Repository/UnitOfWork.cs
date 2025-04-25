@@ -23,5 +23,7 @@ namespace Repository
         {
             return (IGenericRepository<T>)_repositories.GetOrAdd(typeof(T).Name, _ => new GenericRepository<T>(_Context));
         }
+        public async Task<int> SaveChangesAsync() => await _Context.SaveChangesAsync();
+
     }
 }

@@ -8,6 +8,8 @@ namespace Domain.Repository
 {
     public interface IUnitOfWork
     {
+        public Task<int> SaveChangesAsync();
+
         IGenericRepository<T> GetRepository<T>() where T : class;
     }
 }
