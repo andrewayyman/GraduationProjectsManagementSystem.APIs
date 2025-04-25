@@ -20,9 +20,9 @@ namespace Repository
 
         #region Crud
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public IQueryable<T> GetAllAsync()
         {
-            return await _dbContext.Set<T>().ToListAsync();
+            return  _dbContext.Set<T>();
         }
 
         public async Task<T> GetByIdAsync( int id )
@@ -33,20 +33,17 @@ namespace Repository
         public async Task<T> AddAsync( T entity )
         {
             await _dbContext.Set<T>().AddAsync(entity);
-            await _dbContext.SaveChangesAsync();
             return entity;
         }
 
         public async Task UpdateAsync( T entity )
         {
-            _dbContext.Set<T>().Update(entity);
-            await _dbContext.SaveChangesAsync();
+             _dbContext.Set<T>().Update(entity);
         }
 
         public async Task DeleteAsync( T entity )
         {
             _dbContext.Remove(entity);
-            await _dbContext.SaveChangesAsync();
         }
 
         #endregion Crud

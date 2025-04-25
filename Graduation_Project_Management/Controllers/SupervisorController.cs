@@ -21,12 +21,15 @@ namespace Graduation_Project_Management.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly ApplicationDbContext _context;
         private readonly IGenericRepository<Supervisor> _supervisorRepo;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public SupervisorController( UserManager<AppUser> userManager, ApplicationDbContext applicationDbContext, IGenericRepository<Supervisor> supervisorRepo )
+        public SupervisorController( UserManager<AppUser> userManager, ApplicationDbContext applicationDbContext, IGenericRepository<Supervisor> supervisorRepo,IUnitOfWork unitOfWork )
         {
             _userManager = userManager;
             _context = applicationDbContext;
             _supervisorRepo = supervisorRepo;
+            _unitOfWork = unitOfWork;
+            
         }
 
         #region GetAllSupervisors
@@ -34,7 +37,8 @@ namespace Graduation_Project_Management.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SupervisorDto>>> GetAll()
         {
-            var supervisors = await _supervisorRepo.GetAllAsync();
+            var supervisors = await _unitOfWork.GetRepository<Supervisor>().GetAllAsync().ToListAsync();
+
 
             // check if there are any supervisors
             if ( supervisors == null || !supervisors.Any() )

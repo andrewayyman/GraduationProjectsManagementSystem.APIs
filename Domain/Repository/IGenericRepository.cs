@@ -8,7 +8,7 @@ namespace Domain.Repository
 {
     public interface IGenericRepository<T> where T : class
     {
-        Task<IEnumerable<T>> GetAllAsync();
+        IQueryable<T> GetAllAsync();
 
         Task<T> GetByIdAsync( int id );
 
