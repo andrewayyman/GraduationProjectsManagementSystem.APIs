@@ -30,15 +30,42 @@ namespace Graduation_Project_Management.Controllers
 
         #endregion Dependencies
 
-        #region Update Student Profile
+        #region Update 
 
-        [HttpPut("UpdateProfile")]
+        [HttpPut("Update")]
         [Authorize(Roles = "Student")]
-        public async Task<IActionResult> UpdateProfile([FromBody] UpdateStudentProfileDto dto)
+        public async Task<IActionResult> Update([FromForm] UpdateStudentProfileDto dto)
         {
             return await _studentService.UpdateStudentProfileAsync(User, dto);
         }
 
         #endregion Update Student Profile
+
+        #region Delete 
+        [HttpDelete("{id}")]
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            return await _studentService.DeleteStudentProfileAsync(id);
+        }
+        #endregion
+
+        #region Get All 
+        [HttpGet("GetAll")]
+        //[Authorize(Roles = "Admin,Supervisor")]
+        public async Task<IActionResult> GetAllStudents()
+        {
+            return await _studentService.GetAllStudentsAsync();
+        }
+        #endregion
+
+        #region Get  By Id
+        [HttpGet("{id}")]
+        //[Authorize(Roles = "Admin,Supervisor")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            return await _studentService.GetStudentByIdAsync(id);
+        }
+        #endregion
     }
 }

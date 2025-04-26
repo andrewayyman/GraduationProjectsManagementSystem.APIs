@@ -7,5 +7,7 @@
         public string TeamDepartment { get; set; }
         public int MembersCount { get; set; }
         public List<string>? TechStack { get; set; }
+        public List<string>? TeamMembers { get; set; } 
+        public List<string>? ProjectIdeas { get; set; } 
     }
 }

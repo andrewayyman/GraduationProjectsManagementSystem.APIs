@@ -9,7 +9,9 @@ namespace Graduation_Project_Management.IServices
         Task<ActionResult> CreateTeamAsync(ClaimsPrincipal user, TeamDto model);
         Task<IActionResult> DeleteTeamAsync(ClaimsPrincipal user, int teamId);
         Task<IActionResult> GetAvailableTeamsAsync();
-       
-      
+        Task<IActionResult> GetTeamByIdAsync(int id);
+        Task<IActionResult> UpdateTeamProfileAsync(ClaimsPrincipal user, UpdateTeamDto dto);
+
+
     }
 }
