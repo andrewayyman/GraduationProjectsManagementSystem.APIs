@@ -41,8 +41,7 @@ namespace Graduation_Project_Management.Service
                 Description = model.Description,
                 TeamDepartment = model.TeamDepartment,
                 TechStack = model.TechStack ?? new List<string>(),
-                TeamMembers = new List<Student> { student },
-                IsOpenToJoin = true
+                TeamMembers = new List<Student> { student }
             };
 
             await _unitOfWork.GetRepository<Team>().AddAsync(team);
@@ -87,13 +86,70 @@ namespace Graduation_Project_Management.Service
                 Description = t.Description,
                 TeamDepartment = t.TeamDepartment,
                 TechStack = t.TechStack,
-                MembersCount = t.TeamMembers.Count
+                MembersCount = t.TeamMembers.Count,
+                TeamMembers = t.TeamMembers.Select(m => m.FirstName + " " + m.LastName).ToList(),
+
             });
 
             return new OkObjectResult(result);
-        } 
+        }
+
+
         #endregion
 
+        #region Get Team By Id
+        public async Task<IActionResult> GetTeamByIdAsync(int id)
+        {
+            var team = await _unitOfWork.GetRepository<Team>().GetAllAsync()
+                      .Include(t => t.TeamMembers)
+                      .Include(t => t.ProjectIdeas)
+                      .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (team == null)
+                return new NotFoundObjectResult("Team not found");
+
+            var result = new GetTeamsDto
+            {
+                Name = team.Name,
+                Description = team.Description,
+                TeamDepartment = team.TeamDepartment,
+                TechStack = team.TechStack,
+                MembersCount = team.TeamMembers.Count,
+                TeamMembers = team.TeamMembers.Select(m => m.FirstName + " " + m.LastName).ToList(),
+                ProjectIdeas = team.ProjectIdeas.Select(p => p.Title).ToList()
+            };
+
+            return new OkObjectResult(result);
+        }
+        #endregion
+
+        #region Update Team Profile
+        public async Task<IActionResult> UpdateTeamProfileAsync(ClaimsPrincipal user, UpdateTeamDto dto)
+        {
+            var userEmail = user.FindFirstValue(ClaimTypes.Email);
+
+            var student = await _unitOfWork.GetRepository<Student>().GetAllAsync()
+                .Include(s => s.Team)  // 🔥 لازم Include التيم بتاعه
+                .FirstOrDefaultAsync(s => s.Email == userEmail);
+
+            if (student == null)
+                return new NotFoundObjectResult("Student not found");
+
+            if (student.Team == null)
+                return new BadRequestObjectResult("You are not a member of any team");
+
+            var team = student.Team;
+
+            team.Name = dto.Name ?? team.Name;
+            team.Description = dto.Description ?? team.Description;
+            team.TeamDepartment = dto.TeamDepartment ?? team.TeamDepartment;
+            team.TechStack = dto.TechStack ?? team.TechStack;
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return new OkObjectResult(new { message = "Team profile updated successfully" });
+            #endregion
+        }
     }
 }
 

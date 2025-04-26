@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
+using Graduation_Project_Management.Utilities;
 
 namespace Graduation_Project_Management.Service
 {
@@ -15,10 +16,12 @@ namespace Graduation_Project_Management.Service
     {
         #region Dependencies
         private readonly IUnitOfWork _unitOfWork;
+        private readonly UserManager<AppUser> _userManager;
 
-        public StudentService(IUnitOfWork unitOfWork)
+        public StudentService(IUnitOfWork unitOfWork,UserManager<AppUser> userManager )
         {
             _unitOfWork = unitOfWork;
+            _userManager = userManager;
         } 
         #endregion
 
@@ -42,11 +45,118 @@ namespace Graduation_Project_Management.Service
             student.LinkedInProfile = dto.LinkedInProfile ?? student.LinkedInProfile;
             student.MainRole = dto.MainRole ?? student.MainRole;
             student.SecondaryRole = dto.SecondaryRole ?? student.SecondaryRole;
+            if (dto.ProfilePictureUrl != null)
+            {
+                // لو فيه صورة قديمة احذفها
+                if (!string.IsNullOrEmpty(student.ProfilePictureUrl))
+                {
+                    DocumentSetting.DeleteFile("StudentPictures", student.ProfilePictureUrl);
+                }
+
+                var fileName = await DocumentSetting.UploadFileAsync(dto.ProfilePictureUrl, "StudentPictures");
+                student.ProfilePictureUrl = fileName;
+            }
 
             await _unitOfWork.SaveChangesAsync();
 
             return new OkObjectResult(new { message = "Profile updated successfully" });
-        } 
+        }
+        #endregion
+
+        #region Delete 
+        public async Task<IActionResult> DeleteStudentProfileAsync(int studentId)
+        {
+            var studentRepo = _unitOfWork.GetRepository<Student>();
+            var student = await studentRepo.GetAllAsync()
+                .Include(s => s.Team)
+                .Include(s => s.JoinRequests)
+                .FirstOrDefaultAsync(s => s.Id == studentId);
+
+            if (student == null)
+                return new NotFoundObjectResult("Student not found");
+
+            // نحضر اليوزر بالاميل
+            var user = await _userManager.FindByEmailAsync(student.Email);
+
+            if (user == null)
+                return new NotFoundObjectResult("User not found");
+
+            if (student.Team != null)
+            {
+                student.Team.TeamMembers.Remove(student);
+            }
+
+            if (student.JoinRequests != null && student.JoinRequests.Any())
+            {
+                var joinRequestRepo = _unitOfWork.GetRepository<TeamJoinRequest>();
+                foreach (var request in student.JoinRequests)
+                {
+                    await joinRequestRepo.DeleteAsync(request);
+                }
+            }
+
+            await studentRepo.DeleteAsync(student);
+
+            var result = await _userManager.DeleteAsync(user);
+
+            if (!result.Succeeded)
+            {
+                return new BadRequestObjectResult(new { message = "Failed to delete user from Identity." });
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return new OkObjectResult(new { message = "Student and user deleted successfully" });
+        }
+
+        #endregion
+
+        #region Get All 
+        public async Task<IActionResult> GetAllStudentsAsync()
+        {
+            var students = await _unitOfWork.GetRepository<Student>().GetAllAsync().ToListAsync();
+            var studentDtos = students.Select(student => new StudentDto
+            {
+                FirstName = student.FirstName,
+                LastName = student.LastName,
+                Email = student.Email,
+                PhoneNumber = student.PhoneNumber,
+                Department = student.Department,
+                Gpa = student.Gpa,
+                TechStack = student.TechStack,
+                GithubProfile = student.GithubProfile,
+                LinkedInProfile = student.LinkedInProfile,
+                MainRole = student.MainRole,
+                SecondaryRole = student.SecondaryRole
+            }).ToList();
+            return new OkObjectResult(studentDtos);
+        }
+        #endregion
+
+        #region Get  By Id
+        public async Task<IActionResult> GetStudentByIdAsync(int id)
+        {
+            var student = await _unitOfWork.GetRepository<Student>().GetByIdAsync(id);
+
+            if (student == null)
+                return new NotFoundObjectResult("Student not found");
+            var studentDto = new StudentDto
+            {
+                FirstName = student.FirstName,
+                LastName = student.LastName,
+                Email = student.Email,
+                PhoneNumber = student.PhoneNumber,
+                Department = student.Department,
+                Gpa = student.Gpa,
+                TechStack = student.TechStack,
+                GithubProfile = student.GithubProfile,
+                LinkedInProfile = student.LinkedInProfile,
+                MainRole = student.MainRole,
+                SecondaryRole = student.SecondaryRole
+            };
+
+            return new OkObjectResult(studentDto);
+        }
         #endregion
     }
 }

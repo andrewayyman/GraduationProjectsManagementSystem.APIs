@@ -63,8 +63,22 @@ namespace Graduation_Project_Management.Controllers
 
         #endregion Get All Available Teams
 
-       
+        #region Get By Id
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            return await _teamService.GetTeamByIdAsync(id);
+        } 
+        #endregion
 
+        #region Update
+        [HttpPut("Update")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> UpdateTeamProfile([FromBody] UpdateTeamDto dto)
+        {
+            return await _teamService.UpdateTeamProfileAsync(User, dto);
+        }
 
+        #endregion
     }
 }
