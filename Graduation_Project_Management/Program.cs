@@ -1,5 +1,6 @@
 using Domain.Entities.Identity;
 using Graduation_Project_Management.Extension;
+using Graduation_Project_Management.Hubs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Repository.Identity;
@@ -8,7 +9,7 @@ namespace Graduation_Project_Management
 {
     public class Program
     {
-        public static async Task Main( string[] args )
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,8 @@ namespace Graduation_Project_Management
 
             builder.Services.ApplicationServices();
             builder.Services.AddIdentityService(builder.Configuration);
+            builder.Services.AddSignalR();
+
 
             #endregion Services
 
@@ -49,7 +52,7 @@ namespace Graduation_Project_Management
                 var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
                 await AppIdentityDbContextSeed.SeedUserAsync(UserManger, roleManager);
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
                 var logger = loggerFactory.CreateLogger<Program>();
                 logger.LogError(ex, "an error occured during appling the migration");
@@ -60,7 +63,7 @@ namespace Graduation_Project_Management
             #region Middlewares
 
             // Configure the HTTP request pipeline.
-            if ( app.Environment.IsDevelopment() )
+            if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
@@ -68,8 +71,17 @@ namespace Graduation_Project_Management
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+
+            app.UseRouting();
+
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseEndpoints(endpoints =>
+ {
+     endpoints.MapHub<ChatHub>("/hubs/chatHub");
+     endpoints.MapControllers();
+ });
+
             app.MapControllers();
 
             #endregion Middlewares

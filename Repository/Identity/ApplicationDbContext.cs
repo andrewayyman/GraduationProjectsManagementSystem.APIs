@@ -31,5 +31,7 @@ namespace Repository.Identity
         public DbSet<ProjectIdea> ProjectIdeas { get; set; }
 
         public DbSet<ProjectIdeaRequest> ProjectIdeasRequest { get; set; }
+        public DbSet<Message> Messages { get; set; }
+
     }
 }
