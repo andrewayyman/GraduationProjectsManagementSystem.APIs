@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
-
 using SystemTask = System.Threading.Tasks.Task;
 using Domain.Entities;
 using Domain.Repository;
@@ -15,9 +14,9 @@ namespace Graduation_Project_Management.Hubs
         private readonly ApplicationDbContext _context;
         private readonly IUnitOfWork _unitOfWork;
 
-        public ChatHub(ILogger<ChatHub> logger,
+        public ChatHub( ILogger<ChatHub> logger,
                       ApplicationDbContext context,
-                      IUnitOfWork unitOfWork)
+                      IUnitOfWork unitOfWork )
         {
             _logger = logger;
             _context = context;
@@ -30,13 +29,13 @@ namespace Graduation_Project_Management.Hubs
             await base.OnConnectedAsync();
         }
 
-        public override async SystemTask OnDisconnectedAsync(Exception exception)
+        public override async SystemTask OnDisconnectedAsync( Exception exception )
         {
             _logger.LogInformation($"Client disconnected: {Context.ConnectionId}");
             await base.OnDisconnectedAsync(exception);
         }
 
-        public async SystemTask JoinTeamGroup(string userEmail)
+        public async SystemTask JoinTeamGroup( string userEmail )
         {
             try
             {
@@ -48,14 +47,14 @@ namespace Graduation_Project_Management.Hubs
                     .GetAllAsync()
                     .FirstOrDefaultAsync(s => s.Email == userEmail);
 
-                if (student != null)
+                if ( student != null )
                 {
                     var team = await _unitOfWork.GetRepository<Team>()
                         .GetAllAsync()
                         .Include(t => t.TeamMembers)
                         .FirstOrDefaultAsync(t => t.TeamMembers.Any(m => m.Id == student.Id));
 
-                    if (team != null)
+                    if ( team != null )
                     {
                         await Groups.AddToGroupAsync(Context.ConnectionId, $"Team_{team.Id}");
                         await Clients.Group($"Team_{team.Id}")
@@ -63,13 +62,13 @@ namespace Graduation_Project_Management.Hubs
                         _logger.LogInformation($"{student.FirstName} joined Team_{team.Id}");
                     }
                 }
-                else if (supervisor != null)
+                else if ( supervisor != null )
                 {
                     var team = await _unitOfWork.GetRepository<Team>()
                         .GetAllAsync()
                         .FirstOrDefaultAsync(t => t.SupervisorId == supervisor.Id);
 
-                    if (team != null)
+                    if ( team != null )
                     {
                         await Groups.AddToGroupAsync(Context.ConnectionId, $"Team_{team.Id}");
                         await Clients.Group($"Team_{team.Id}")
@@ -78,14 +77,14 @@ namespace Graduation_Project_Management.Hubs
                     }
                 }
             }
-            catch (Exception ex)
+            catch ( Exception ex )
             {
                 _logger.LogError(ex, "Error in JoinTeamGroup");
                 throw;
             }
         }
 
-        public async SystemTask SendMessageToTeam(string userName, string userEmail, string message)
+        public async SystemTask SendMessageToTeam( string userName, string userEmail, string message )
         {
             try
             {
@@ -99,7 +98,7 @@ namespace Graduation_Project_Management.Hubs
 
                 int? teamId = null;
 
-                if (student != null)
+                if ( student != null )
                 {
                     var team = await _unitOfWork.GetRepository<Team>()
                         .GetAllAsync()
@@ -107,7 +106,7 @@ namespace Graduation_Project_Management.Hubs
                         .FirstOrDefaultAsync(t => t.TeamMembers.Any(m => m.Id == student.Id));
                     teamId = team?.Id;
                 }
-                else if (supervisor != null)
+                else if ( supervisor != null )
                 {
                     var team = await _unitOfWork.GetRepository<Team>()
                         .GetAllAsync()
@@ -115,7 +114,7 @@ namespace Graduation_Project_Management.Hubs
                     teamId = team?.Id;
                 }
 
-                if (!teamId.HasValue)
+                if ( !teamId.HasValue )
                 {
                     throw new HubException("Cannot find team for this user.");
                 }
@@ -134,7 +133,7 @@ namespace Graduation_Project_Management.Hubs
                 await _context.Messages.AddAsync(msg);
                 await _context.SaveChangesAsync();
             }
-            catch (Exception ex)
+            catch ( Exception ex )
             {
                 _logger.LogError(ex, "Error in SendMessageToTeam");
                 throw;

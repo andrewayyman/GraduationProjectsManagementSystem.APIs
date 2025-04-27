@@ -9,11 +9,11 @@ namespace Graduation_Project_Management
 {
     public class Program
     {
-        public static async Task Main(string[] args)
+        public static async Task Main( string[] args )
         {
-            var builder = WebApplication.CreateBuilder(args);
-
             #region Services
+
+            var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
 
@@ -31,10 +31,11 @@ namespace Graduation_Project_Management
             builder.Services.AddIdentityService(builder.Configuration);
             builder.Services.AddSignalR();
 
-
             #endregion Services
 
             var app = builder.Build();
+
+            #region Middlewares
 
             #region Update Database
 
@@ -52,7 +53,7 @@ namespace Graduation_Project_Management
                 var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
                 await AppIdentityDbContextSeed.SeedUserAsync(UserManger, roleManager);
             }
-            catch (Exception ex)
+            catch ( Exception ex )
             {
                 var logger = loggerFactory.CreateLogger<Program>();
                 logger.LogError(ex, "an error occured during appling the migration");
@@ -60,10 +61,16 @@ namespace Graduation_Project_Management
 
             #endregion Update Database
 
-            #region Middlewares
+            // Configure CORS
+            app.UseCors(options =>
+            {
+                options.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
+            });
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
+            if ( app.Environment.IsDevelopment() )
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
