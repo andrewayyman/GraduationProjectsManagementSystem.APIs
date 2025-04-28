@@ -11,6 +11,7 @@ using Graduation_Project_Management.Errors;
 using System.Security.Claims;
 using Domain.Enums;
 using Graduation_Project_Management.DTOs;
+using Graduation_Project_Management.IServices;
 
 namespace Graduation_Project_Management.Controllers
 {
@@ -18,18 +19,19 @@ namespace Graduation_Project_Management.Controllers
     [ApiController]
     public class SupervisorController : ControllerBase
     {
+        private readonly ISupervisorService _supervisorService;
         private readonly UserManager<AppUser> _userManager;
         private readonly ApplicationDbContext _context;
         private readonly IGenericRepository<Supervisor> _supervisorRepo;
         private readonly IUnitOfWork _unitOfWork;
 
-        public SupervisorController( UserManager<AppUser> userManager, ApplicationDbContext applicationDbContext, IGenericRepository<Supervisor> supervisorRepo,IUnitOfWork unitOfWork )
+        public SupervisorController( ISupervisorService supervisorService, UserManager<AppUser> userManager, ApplicationDbContext applicationDbContext, IGenericRepository<Supervisor> supervisorRepo, IUnitOfWork unitOfWork )
         {
+            _supervisorService = supervisorService;
             _userManager = userManager;
             _context = applicationDbContext;
             _supervisorRepo = supervisorRepo;
             _unitOfWork = unitOfWork;
-            
         }
 
         #region GetAllSupervisors
@@ -37,34 +39,7 @@ namespace Graduation_Project_Management.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SupervisorDto>>> GetAll()
         {
-            var supervisors = await _unitOfWork.GetRepository<Supervisor>().GetAllAsync().ToListAsync();
-
-
-            // check if there are any supervisors
-            if ( supervisors == null || !supervisors.Any() )
-                return NotFound(new ApiResponse(404, "There is no any supervisors "));
-
-            var ReturnedSupervisors = supervisors.Select(s => new SupervisorDto
-            {
-                Id = s.Id,
-                FirstName = s.FirstName,
-                LastName = s.LastName,
-                Email = s.Email,
-                PhoneNumber = s.PhoneNumber,
-                Department = s.Department,
-                ProfilePictureUrl = s.ProfilePictureUrl,
-                MaxAssignedTeams = s.MaxAssignedTeams,
-                PreferredTechnologies = s.PreferredTechnologies,
-                SupervisedTeams = _context.Teams
-                    .Where(t => t.SupervisorId == s.Id)
-                    .Select(t => new TeamDto
-                    {
-                        Name = t.Name,
-                        TechStack = t.TechStack
-                    }).ToList(),
-            }).ToList();
-
-            return Ok(ReturnedSupervisors);
+            return await _supervisorService.GetAllSupervisorsAsync();
         }
 
         #endregion GetAllSupervisors
