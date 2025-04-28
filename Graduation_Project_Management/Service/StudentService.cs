@@ -12,27 +12,30 @@ using Graduation_Project_Management.Utilities;
 
 namespace Graduation_Project_Management.Service
 {
-    public class StudentService :IStudentService
+    public class StudentService : IStudentService
     {
         #region Dependencies
+
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
 
-        public StudentService(IUnitOfWork unitOfWork,UserManager<AppUser> userManager )
+        public StudentService( IUnitOfWork unitOfWork, UserManager<AppUser> userManager )
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
-        } 
-        #endregion
+        }
 
-        #region Update Student Profile 
-        public async Task<IActionResult> UpdateStudentProfileAsync(ClaimsPrincipal user, UpdateStudentProfileDto dto)
+        #endregion Dependencies
+
+        #region Update Student Profile
+
+        public async Task<IActionResult> UpdateStudentProfileAsync( ClaimsPrincipal user, UpdateStudentProfileDto dto )
         {
             var userEmail = user.FindFirstValue(ClaimTypes.Email);
             var student = await _unitOfWork.GetRepository<Student>().GetAllAsync()
                 .FirstOrDefaultAsync(s => s.Email == userEmail);
 
-            if (student == null)
+            if ( student == null )
                 return new NotFoundObjectResult("Student not found");
 
             student.FirstName = dto.FirstName ?? student.FirstName;
@@ -45,10 +48,10 @@ namespace Graduation_Project_Management.Service
             student.LinkedInProfile = dto.LinkedInProfile ?? student.LinkedInProfile;
             student.MainRole = dto.MainRole ?? student.MainRole;
             student.SecondaryRole = dto.SecondaryRole ?? student.SecondaryRole;
-            if (dto.ProfilePictureUrl != null)
+            if ( dto.ProfilePictureUrl != null )
             {
                 // لو فيه صورة قديمة احذفها
-                if (!string.IsNullOrEmpty(student.ProfilePictureUrl))
+                if ( !string.IsNullOrEmpty(student.ProfilePictureUrl) )
                 {
                     DocumentSetting.DeleteFile("StudentPictures", student.ProfilePictureUrl);
                 }
@@ -61,10 +64,12 @@ namespace Graduation_Project_Management.Service
 
             return new OkObjectResult(new { message = "Profile updated successfully" });
         }
-        #endregion
 
-        #region Delete 
-        public async Task<IActionResult> DeleteStudentProfileAsync(int studentId)
+        #endregion Update Student Profile
+
+        #region Delete
+
+        public async Task<IActionResult> DeleteStudentProfileAsync( int studentId )
         {
             var studentRepo = _unitOfWork.GetRepository<Student>();
             var student = await studentRepo.GetAllAsync()
@@ -72,24 +77,24 @@ namespace Graduation_Project_Management.Service
                 .Include(s => s.JoinRequests)
                 .FirstOrDefaultAsync(s => s.Id == studentId);
 
-            if (student == null)
+            if ( student == null )
                 return new NotFoundObjectResult("Student not found");
 
             // نحضر اليوزر بالاميل
             var user = await _userManager.FindByEmailAsync(student.Email);
 
-            if (user == null)
+            if ( user == null )
                 return new NotFoundObjectResult("User not found");
 
-            if (student.Team != null)
+            if ( student.Team != null )
             {
                 student.Team.TeamMembers.Remove(student);
             }
 
-            if (student.JoinRequests != null && student.JoinRequests.Any())
+            if ( student.JoinRequests != null && student.JoinRequests.Any() )
             {
                 var joinRequestRepo = _unitOfWork.GetRepository<TeamJoinRequest>();
-                foreach (var request in student.JoinRequests)
+                foreach ( var request in student.JoinRequests )
                 {
                     await joinRequestRepo.DeleteAsync(request);
                 }
@@ -99,7 +104,7 @@ namespace Graduation_Project_Management.Service
 
             var result = await _userManager.DeleteAsync(user);
 
-            if (!result.Succeeded)
+            if ( !result.Succeeded )
             {
                 return new BadRequestObjectResult(new { message = "Failed to delete user from Identity." });
             }
@@ -109,9 +114,10 @@ namespace Graduation_Project_Management.Service
             return new OkObjectResult(new { message = "Student and user deleted successfully" });
         }
 
-        #endregion
+        #endregion Delete
 
-        #region Get All 
+        #region Get All
+
         public async Task<IActionResult> GetAllStudentsAsync()
         {
             var students = await _unitOfWork.GetRepository<Student>().GetAllAsync().ToListAsync();
@@ -131,14 +137,16 @@ namespace Graduation_Project_Management.Service
             }).ToList();
             return new OkObjectResult(studentDtos);
         }
-        #endregion
+
+        #endregion Get All
 
         #region Get  By Id
-        public async Task<IActionResult> GetStudentByIdAsync(int id)
+
+        public async Task<IActionResult> GetStudentByIdAsync( int id )
         {
             var student = await _unitOfWork.GetRepository<Student>().GetByIdAsync(id);
 
-            if (student == null)
+            if ( student == null )
                 return new NotFoundObjectResult("Student not found");
             var studentDto = new StudentDto
             {
@@ -157,6 +165,7 @@ namespace Graduation_Project_Management.Service
 
             return new OkObjectResult(studentDto);
         }
-        #endregion
+
+        #endregion Get  By Id
     }
 }

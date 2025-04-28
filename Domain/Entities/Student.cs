@@ -31,7 +31,6 @@ namespace Domain.Entities
         public string UserId { get; set; }
         public AppUser User { get; set; }
 
-
         // one student can be in on team , teams can have many students
         public int? TeamId { get; set; }
 
