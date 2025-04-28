@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Graduation_Project_Management.DTOs.SupervisorDTOs;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Graduation_Project_Management.IServices
 {
@@ -6,6 +8,16 @@ namespace Graduation_Project_Management.IServices
     {
         Task<ActionResult> GetAllSupervisorsAsync();
 
-        //Task<IActionResult> GetSupervisorById( int id );
+        Task<ActionResult> GetSupervisorByIdAsync( int id );
+
+        Task<ActionResult> UpdateSupervisorProfileAsync( int id, UpdateSupervisorDto supervisorDto );
+
+        Task<ActionResult> DeleteSupervisorProfileAsync( int id );
+
+        Task<ActionResult> GetPendingRequestsAsync( ClaimsPrincipal user );
+
+        Task<ActionResult> GetMyTeamsAsync( ClaimsPrincipal user );
+
+        Task<ActionResult> HandleIdeaRequestAsync( ClaimsPrincipal user, HandleIdeaRequestDto dto );
     }
 }

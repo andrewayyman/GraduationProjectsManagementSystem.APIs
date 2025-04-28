@@ -13,6 +13,5 @@
         public string? LinkedInProfile { get; set; }
         public string? MainRole { get; set; }
         public string? SecondaryRole { get; set; }
-
     }
 }
