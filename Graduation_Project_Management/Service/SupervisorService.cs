@@ -37,7 +37,10 @@ namespace Graduation_Project_Management.Service
 
         public async Task<ActionResult> GetAllSupervisorsAsync()
         {
-            var supervisors = await _unitOfWork.GetRepository<Supervisor>().GetAllAsync().ToListAsync();
+            var supervisors = await _unitOfWork.GetRepository<Supervisor>()
+                                               .GetAllAsync()
+                                               .ToListAsync();
+
             if ( supervisors == null || !supervisors.Any() )
                 return new NotFoundObjectResult(new ApiResponse(404, "There are no supervisors."));
 
@@ -57,6 +60,8 @@ namespace Graduation_Project_Management.Service
                     .Select(t => new TeamDto
                     {
                         Name = t.Name,
+                        Description = t.Description,
+                        TeamDepartment = t.TeamDepartment,
                         TechStack = t.TechStack
                     }).ToList(),
             }).ToList();
@@ -92,6 +97,8 @@ namespace Graduation_Project_Management.Service
                     .Select(t => new TeamDto
                     {
                         Name = t.Name,
+                        Description = t.Description,
+                        TeamDepartment = t.TeamDepartment,
                         TechStack = t.TechStack
                     }).ToList(),
             };
@@ -225,7 +232,7 @@ namespace Graduation_Project_Management.Service
             Console.WriteLine("Extracted email from token: " + email);  // Or use a logger
 
             if ( supervisor == null )
-                return new UnauthorizedObjectResult(new ApiResponse(401 , "Supervisor not found."));
+                return new UnauthorizedObjectResult(new ApiResponse(401, "Supervisor not found."));
 
             var request = await _context.ProjectIdeasRequest
                 .Include(r => r.ProjectIdea)
@@ -234,7 +241,7 @@ namespace Graduation_Project_Management.Service
                 .FirstOrDefaultAsync(r => r.Id == dto.RequestId && r.SupervisorId == supervisor.Id);
 
             if ( request == null )
-                return new NotFoundObjectResult(new ApiResponse(404 , "Request not found"));
+                return new NotFoundObjectResult(new ApiResponse(404, "Request not found"));
 
             if ( dto.IsApproved )
             {

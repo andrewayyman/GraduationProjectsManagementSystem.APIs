@@ -1,6 +1,7 @@
 ﻿using Domain.Repository;
 using Graduation_Project_Management.IServices;
 using Graduation_Project_Management.Service;
+using Graduation_Project_Management.Utilities;
 using Repository;
 
 namespace Graduation_Project_Management.Extension
@@ -16,8 +17,6 @@ namespace Graduation_Project_Management.Extension
             Services.AddScoped(typeof(IProjectIdeaService), typeof(ProjectIdeaService));
             Services.AddScoped(typeof(IRequestService), typeof(RequestService));
             Services.AddScoped(typeof(ISupervisorService), typeof(SupervisorService));
-
-            Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             return Services;
         }
