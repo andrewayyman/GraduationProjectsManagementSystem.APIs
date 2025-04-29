@@ -20,7 +20,7 @@ namespace Domain.Entities
         // RelationShips
 
         // one team can have many students, and one student can be in one team
-        public ICollection<Student>? TeamMembers { get; set; }                                  // list of students in the team
+        public ICollection<Student>? TeamMembers { get; set; }                              // list of students in the team
 
         // team can have one supervisor, and one supervisor can have many teams
         public int? SupervisorId { get; set; }

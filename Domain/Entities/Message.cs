@@ -12,11 +12,11 @@ namespace Domain.Entities
 
         public string MessageText { get; set; }
 
-        public string SenderName { get; set; }   // اللي بعت الرسالة (اسم الطالب أو المشرف)
+        public string SenderName { get; set; }
 
-        public int? TeamId { get; set; }          // فريق اللي الرسالة تخصه
+        public int? TeamId { get; set; }
 
-        public DateTime SentAt { get; set; } = DateTime.UtcNow;  // توقيت إرسال الرسالة
+        public DateTime SentAt { get; set; } = DateTime.UtcNow;
 
         public Team Team { get; set; }
     }
