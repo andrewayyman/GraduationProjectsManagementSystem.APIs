@@ -229,7 +229,6 @@ namespace Graduation_Project_Management.Service
         {
             var email = user.FindFirstValue(ClaimTypes.Email);
             var supervisor = await _context.Supervisors.FirstOrDefaultAsync(s => s.Email == email);
-            Console.WriteLine("Extracted email from token: " + email);  // Or use a logger
 
             if ( supervisor == null )
                 return new UnauthorizedObjectResult(new ApiResponse(401, "Supervisor not found."));
