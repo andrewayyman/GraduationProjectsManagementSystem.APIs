@@ -32,6 +32,45 @@ namespace Graduation_Project_Management.Service
 
         #endregion Dependencies
 
+        #region GetAllTasks Service
+
+        public async Task<ActionResult> GetAllTasksAsync()
+        {
+            var tasks = await _tasksRepo.GetAllAsync()
+           .Include(t => t.Team)
+           .Include(t => t.Supervisor)
+           .Include(t => t.AssignedStudent)
+           .ToListAsync();
+
+            if ( tasks == null || !tasks.Any() )
+                return new NotFoundObjectResult(new ApiResponse(404, "No tasks found."));
+
+            var response = tasks.Select(async t =>
+            {
+                // Get the project idea by team id
+                var projectIdea = await _context.ProjectIdeas
+                    .FirstOrDefaultAsync(p => p.TeamId == t.TeamId);
+
+                return new TaskResponseDto
+                {
+                    TaskId = t.Id,
+                    Title = t.Title,
+                    Description = t.Description,
+                    Deadline = t.Deadline,
+                    Status = t.Status.ToString(),
+                    TeamName = t.Team?.Name,
+                    SupervisorName = t.Supervisor != null ? $"{t.Supervisor.FirstName} {t.Supervisor.LastName}" : null,
+                    AssignedStudentName = t.AssignedStudent != null ? $"{t.AssignedStudent.FirstName} {t.AssignedStudent.LastName}" : null,
+                    ProjectIdeaTitle = projectIdea?.Title,
+                    Message = "Task Retrieved Successfully"
+                };
+            }).Select(t => t.Result).ToList();
+
+            return new OkObjectResult(response);
+        }
+
+        #endregion GetAllTasks Service
+
         #region CreateTask Service
 
         public async Task<ActionResult> CreateTaskAsync( CreateTaskDto dto, ClaimsPrincipal user )
@@ -203,45 +242,6 @@ namespace Graduation_Project_Management.Service
         }
 
         #endregion GetTaskByID Service
-
-        #region GetAllTasks Service
-
-        public async Task<ActionResult> GetAllTasksAsync()
-        {
-            var tasks = await _tasksRepo.GetAllAsync()
-           .Include(t => t.Team)
-           .Include(t => t.Supervisor)
-           .Include(t => t.AssignedStudent)
-           .ToListAsync();
-
-            if ( tasks == null || !tasks.Any() )
-                return new NotFoundObjectResult(new ApiResponse(404, "No tasks found."));
-
-            var response = tasks.Select(async t =>
-            {
-                // Get the project idea by team id
-                var projectIdea = await _context.ProjectIdeas
-                    .FirstOrDefaultAsync(p => p.TeamId == t.TeamId);
-
-                return new TaskResponseDto
-                {
-                    TaskId = t.Id,
-                    Title = t.Title,
-                    Description = t.Description,
-                    Deadline = t.Deadline,
-                    Status = t.Status.ToString(),
-                    TeamName = t.Team?.Name,
-                    SupervisorName = t.Supervisor != null ? $"{t.Supervisor.FirstName} {t.Supervisor.LastName}" : null,
-                    AssignedStudentName = t.AssignedStudent != null ? $"{t.AssignedStudent.FirstName} {t.AssignedStudent.LastName}" : null,
-                    ProjectIdeaTitle = projectIdea?.Title,
-                    Message = "Task Retrieved Successfully"
-                };
-            }).Select(t => t.Result).ToList();
-
-            return new OkObjectResult(response);
-        }
-
-        #endregion GetAllTasks Service
 
         #region GetTaskByTeamId Service
 

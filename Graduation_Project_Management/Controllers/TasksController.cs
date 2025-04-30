@@ -24,6 +24,16 @@ namespace Graduation_Project_Management.Controllers
             _tasksServices = tasksServices;
         }
 
+        // maybe for admin
+
+        #region GetAllTasks
+
+        [HttpGet]
+        public async Task<ActionResult> GetAllTasks()
+        => await _tasksServices.GetAllTasksAsync();
+
+        #endregion GetAllTasks
+
         #region CreateTask
 
         [HttpPost]
@@ -58,16 +68,6 @@ namespace Graduation_Project_Management.Controllers
 
         #endregion GetTaskById
 
-        // maybe for admin
-
-        #region GetAllTasks
-
-        [HttpGet]
-        public async Task<ActionResult> GetAllTasks()
-        => await _tasksServices.GetAllTasksAsync();
-
-        #endregion GetAllTasks
-
         #region GetTasksByTeamId
 
         [HttpGet("team/{teamId}")]
@@ -99,6 +99,8 @@ namespace Graduation_Project_Management.Controllers
             => await _tasksServices.FilterTasksAsync(filter);
 
         #endregion FilterTasks
+
+        // from student
 
         #region ChangeTaskStatus
 
