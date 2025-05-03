@@ -86,6 +86,7 @@ namespace Graduation_Project_Management
             app.UseEndpoints(endpoints =>
  {
      endpoints.MapHub<ChatHub>("/hubs/chatHub");
+     endpoints.MapHub<NotificationHub>("/hubs/notificationHub");
      endpoints.MapControllers();
  });
 
