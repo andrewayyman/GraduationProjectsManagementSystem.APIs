@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Notification Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background-color: #fffbe6;
+            border-left: 4px solid #ffc107;
+            border-radius: 4px;
+        }
+
+            .notification strong {
+                color: #e67e22;
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="notificationArea">
+            <div id="notificationHeader">
+                <h2>Notifications</h2>
+            </div>
+            <div id="notificationMessages"></div>
+        </div>
+    </div>
+
+    <!-- Load libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const notificationMessages = document.getElementById("notificationMessages");
+
+            // SignalR connection
+            const connectionNotif = new signalR.HubConnectionBuilder()
+                .withUrl("/hubs/notificationHub")
+                .configureLogging(signalR.LogLevel.Information)
+                .build();
+
+            // Get user ID from JWT or fallback
+            function getUserId() {
+                const token = sessionStorage.getItem('jwtToken');
+                if (token) {
+                    try {
+                        const decoded = JSON.parse(atob(token.split('.')[1]));
+                        return decoded.sub; // Adjust based on JWT structure
+                    } catch (e) {
+                        console.error("Error decoding JWT:", e);
+                    }
+                }
+                return prompt("Enter your user ID:");
+            }
+
+            async function startNotificationConnection(retryCount = 0) {
+                const maxRetries = 5;
+                const retryDelay = Math.min(1000 * Math.pow(2, retryCount), 30000);
+
+                try {
+                    if (connectionNotif.state !== signalR.HubConnectionState.Disconnected) {
+                        console.log(`Connection is in ${connectionNotif.state} state. Skipping start.`);
+                        return;
+                    }
+
+                    await connectionNotif.start();
+                    console.log("NotificationHub Connected.");
+
+                    const userEmail = sessionStorage.getItem('chatUserEmail') || prompt("Enter your email:");
+                    const userId = getUserId();
+                    sessionStorage.setItem('userId', userId);
+
+                    await connectionNotif.invoke("RegisterUser", userId);
+                } catch (err) {
+                    console.error("Notification connection error:", err.toString());
+                    if (retryCount < maxRetries) {
+                        console.log(`Retrying in ${retryDelay}ms... (Attempt ${retryCount + 1}/${maxRetries})`);
+                        setTimeout(() => startNotificationConnection(retryCount + 1), retryDelay);
+                    } else {
+                        console.error("Max retries reached. Could not connect to NotificationHub.");
+                    }
+                }
+            }
+
+            connectionNotif.on("ReceiveNotification", (title, content) => {
+                const notif = document.createElement("div");
+                notif.className = "notification";
+                notif.innerHTML = `<strong>${title}</strong><div>${content}</div>`;
+                notificationMessages.prepend(notif);
+            });
+
+            startNotificationConnection();
+
+            connectionNotif.onclose(async () => {
+                console.log("NotificationHub closed. Reconnecting...");
+                await startNotificationConnection();
+            });
+        });
+    </script>
+</body>
+</html>

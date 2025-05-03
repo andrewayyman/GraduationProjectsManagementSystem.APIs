@@ -11,6 +11,8 @@ using Graduation_Project_Management.DTOs;
 using Graduation_Project_Management.Errors;
 using System.Security.Claims;
 using Domain.Enums;
+using Graduation_Project_Management.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Graduation_Project_Management.Service
 {
@@ -22,13 +24,16 @@ namespace Graduation_Project_Management.Service
         private readonly ApplicationDbContext _context;
         private readonly IGenericRepository<Supervisor> _supervisorRepo;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IHubContext<NotificationHub> _notificationHub;
 
-        public SupervisorService( UserManager<AppUser> userManager, ApplicationDbContext context, IGenericRepository<Supervisor> supervisorRepo, IUnitOfWork unitOfWork )
+
+        public SupervisorService( UserManager<AppUser> userManager, ApplicationDbContext context, IGenericRepository<Supervisor> supervisorRepo, IUnitOfWork unitOfWork,IHubContext<NotificationHub> notificationHub)
         {
             _userManager = userManager;
             _context = context;
             _supervisorRepo = supervisorRepo;
             _unitOfWork = unitOfWork;
+            _notificationHub = notificationHub;
         }
 
         #endregion Dependencies
@@ -225,40 +230,97 @@ namespace Graduation_Project_Management.Service
 
         #region HandleRequest Service
 
-        public async Task<ActionResult> HandleIdeaRequestAsync( ClaimsPrincipal user, HandleIdeaRequestDto dto )
+        public async Task<ActionResult> HandleIdeaRequestAsync(ClaimsPrincipal user, HandleIdeaRequestDto dto)
         {
             var email = user.FindFirstValue(ClaimTypes.Email);
             var supervisor = await _context.Supervisors.FirstOrDefaultAsync(s => s.Email == email);
 
-            if ( supervisor == null )
+            if (supervisor == null)
                 return new UnauthorizedObjectResult(new ApiResponse(401, "Supervisor not found."));
 
             var request = await _context.ProjectIdeasRequest
                 .Include(r => r.ProjectIdea)
                 .ThenInclude(pi => pi.Team)
-
+                .ThenInclude(t => t.TeamMembers)
                 .FirstOrDefaultAsync(r => r.Id == dto.RequestId && r.SupervisorId == supervisor.Id);
 
-            if ( request == null )
+            if (request == null)
                 return new NotFoundObjectResult(new ApiResponse(404, "Request not found"));
 
-            if ( dto.IsApproved )
+            try
             {
-                request.Status = ProjectIdeaStatus.Accepted;
-                request.ProjectIdea.SupervisorId = supervisor.Id;
-                request.ProjectIdea.Team.SupervisorId = supervisor.Id;
-                request.ProjectIdea.Status = ProjectIdeaStatus.Accepted;
+                string title = "";
+                string content = "";
+                Notification notification = null;
+
+                if (dto.IsApproved)
+                {
+                    request.Status = ProjectIdeaStatus.Accepted;
+                    request.ProjectIdea.SupervisorId = supervisor.Id;
+                    request.ProjectIdea.Team.SupervisorId = supervisor.Id;
+                    request.ProjectIdea.Status = ProjectIdeaStatus.Accepted;
+
+                    title = "Project Idea Request Approved";
+                    content = $"Your project idea request for team '{request.ProjectIdea.Team.Name}' has been approved by the supervisor.";
+                }
+                else
+                {
+                    request.Status = ProjectIdeaStatus.Rejected;
+
+                    title = "Project Idea Request Rejected";
+                    content = $"Your project idea request for team '{request.ProjectIdea.Team.Name}' has been rejected by the supervisor.";
+                }
+
+                // Save changes to update request and project idea
+                await _context.SaveChangesAsync();
+                Console.WriteLine("Project idea request changes saved to database.");
+
+                // Send notifications to team members
+                foreach (var member in request.ProjectIdea.Team.TeamMembers)
+                {
+                    notification = new Notification
+                    {
+                        Message = content,
+                        RecipientId = member.UserId,
+                        Type = NotificationType.ProjectIdeaRequest,
+                        Status = NotificationStatus.Unread,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    // Log notification details
+                    Console.WriteLine($"Preparing notification: RecipientId={member.UserId}, Title={title}, Content={content}");
+
+                    // Save notification to database
+                    _context.Notifications.Add(notification);
+                    await _context.SaveChangesAsync();
+                    Console.WriteLine($"Notification saved for RecipientId={member.UserId}");
+
+                    // Send notification via SignalR
+                    var connectionId = NotificationHub.GetConnectionId(member.UserId);
+                    if (connectionId != null)
+                    {
+                        await _notificationHub.Clients.Client(connectionId)
+                            .SendAsync("ReceiveNotification", title, content);
+                        Console.WriteLine($"Notification sent to RecipientId={member.UserId}, ConnectionId={connectionId}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"No active connection found for RecipientId={member.UserId}");
+                    }
+                }
+
+                return new OkObjectResult(new { message = $"Request {(dto.IsApproved ? "approved" : "declined")} successfully" });
             }
-            else
+            catch (Exception ex)
             {
-                request.Status = ProjectIdeaStatus.Rejected;
+                Console.WriteLine($"Error processing project idea request: {ex.Message}");
+                return new ObjectResult(new ApiResponse(500, "An error occurred while processing the request"))
+                {
+                    StatusCode = StatusCodes.Status500InternalServerError
+                };
             }
-
-            await _context.SaveChangesAsync();
-
-            return new OkObjectResult(new { message = $"Request {( dto.IsApproved ? "approved" : "declined" )} successfully" });
         }
-
         #endregion HandleRequest Service
+
     }
 }
