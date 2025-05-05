@@ -67,7 +67,7 @@ namespace Graduation_Project_Management.Controllers
             };
 
             await _unitOfWork.GetRepository<Supervisor>().AddAsync(supervisor);
-
+            await _unitOfWork.SaveChangesAsync();
 
             var returnedUser = new UserDto()
             {
