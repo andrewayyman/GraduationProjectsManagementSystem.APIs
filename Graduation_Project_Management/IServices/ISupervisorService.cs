@@ -9,6 +9,7 @@ namespace Graduation_Project_Management.IServices
         Task<ActionResult> GetAllSupervisorsAsync();
 
         Task<ActionResult> GetSupervisorByIdAsync( int id );
+        Task<ActionResult> GetSupervisorByEmailAsync( string email );
 
         Task<ActionResult> UpdateSupervisorProfileAsync( int id, UpdateSupervisorDto supervisorDto );
 

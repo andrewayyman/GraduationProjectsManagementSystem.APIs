@@ -113,6 +113,43 @@ namespace Graduation_Project_Management.Service
 
         #endregion GetSupervisorById service
 
+        #region GetSupervisorByEmail service
+        public async Task<ActionResult> GetSupervisorByEmailAsync(string email)
+        {
+            var supervisor = await _context.Supervisors
+                .Include(s => s.SupervisedTeams) // فقط لو فيه علاقة ملاحية
+                .FirstOrDefaultAsync(s => s.Email.ToLower() == email.ToLower());
+
+            if (supervisor == null)
+                return new NotFoundObjectResult(new ApiResponse(404, "There is no supervisor with this email"));
+
+            var ReturnedSupervisor = new SupervisorDto()
+            {
+                Id = supervisor.Id,
+                FirstName = supervisor.FirstName,
+                LastName = supervisor.LastName,
+                Email = supervisor.Email,
+                PhoneNumber = supervisor.PhoneNumber,
+                Department = supervisor.Department,
+                ProfilePictureUrl = supervisor.ProfilePictureUrl,
+                MaxAssignedTeams = supervisor.MaxAssignedTeams,
+                PreferredTechnologies = supervisor.PreferredTechnologies,
+                SupervisedTeams = _context.Teams
+                    .Where(t => t.SupervisorId == supervisor.Id)
+                    .Select(t => new TeamDto
+                    {
+                        Name = t.Name,
+                        Description = t.Description,
+                        TeamDepartment = t.TeamDepartment,
+                        TechStack = t.TechStack
+                    }).ToList(),
+            };
+
+            return new OkObjectResult(ReturnedSupervisor);
+        } 
+        #endregion
+
+
         #region UpdateSupervisor service
 
         public async Task<ActionResult> UpdateSupervisorProfileAsync( int id, UpdateSupervisorDto supervisorDto )

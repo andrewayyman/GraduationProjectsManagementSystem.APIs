@@ -43,6 +43,15 @@ namespace Graduation_Project_Management.Controllers
 
         #endregion GetSupervisorById
 
+
+        #region GetSupervisorByEmail
+
+        [HttpGet("Email/{email}")]
+        public async Task<ActionResult<SupervisorDto>> GetByEmail(string email)
+            => await _supervisorService.GetSupervisorByEmailAsync(email);
+
+        #endregion GetSupervisorByEmail
+
         #region UpdateSupervisor
 
         [HttpPut("{id}")]
