@@ -42,7 +42,7 @@ namespace Graduation_Project_Management.Controllers
 
         #endregion Create team
 
-        #region Delete Team
+        #region DeleteTeam
 
         [HttpDelete("{teamId}")]
         [Authorize]
@@ -53,7 +53,7 @@ namespace Graduation_Project_Management.Controllers
 
         #endregion Delete Team
 
-        #region Get All
+        #region GetAvailableTeams
 
         [HttpGet("Available")]
         public async Task<IActionResult> GetAvailableTeams()
@@ -63,9 +63,9 @@ namespace Graduation_Project_Management.Controllers
 
         #endregion Get All Available Teams
 
-        #region Get By Id
+        #region GetTeamById
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetTeamById( int id)
         {
             return await _teamService.GetTeamByIdAsync(id);
         } 
@@ -78,6 +78,17 @@ namespace Graduation_Project_Management.Controllers
         {
             return await _teamService.UpdateTeamProfileAsync(User, dto);
         }
+
+        #endregion
+
+        #region GetTeamByStudentID
+        [HttpGet("student/{studentId}")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> GetTeamByStudentId( int studentId )
+        {
+            return await _teamService.GetTeamByStudentIdAsync(studentId, User);
+        }
+
 
         #endregion
     }

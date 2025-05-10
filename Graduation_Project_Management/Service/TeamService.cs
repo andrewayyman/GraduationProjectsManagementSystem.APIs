@@ -15,24 +15,24 @@ namespace Graduation_Project_Management.Service
         #region Dependencies
         private readonly IUnitOfWork _unitOfWork;
 
-        public TeamService(IUnitOfWork unitOfWork)
+        public TeamService( IUnitOfWork unitOfWork )
         {
             _unitOfWork = unitOfWork;
         }
         #endregion
 
         #region Create
-        public async Task<ActionResult> CreateTeamAsync(ClaimsPrincipal user, TeamDto model)
+        public async Task<ActionResult> CreateTeamAsync( ClaimsPrincipal user, TeamDto model )
         {
             var userEmail = user.FindFirstValue(ClaimTypes.Email);
             var student = await _unitOfWork.GetRepository<Student>().GetAllAsync()
                 .Include(s => s.Team)
                 .FirstOrDefaultAsync(s => s.Email == userEmail);
 
-            if (student == null)
+            if ( student == null )
                 return new NotFoundObjectResult("Student profile not found.");
 
-            if (student.Team != null)
+            if ( student.Team != null )
                 return new BadRequestObjectResult("You are already part of a team.");
 
             var team = new Team
@@ -52,17 +52,17 @@ namespace Graduation_Project_Management.Service
         #endregion
 
         #region Delete 
-        public async Task<IActionResult> DeleteTeamAsync(ClaimsPrincipal user, int teamId)
+        public async Task<IActionResult> DeleteTeamAsync( ClaimsPrincipal user, int teamId )
         {
             var userEmail = user.FindFirstValue(ClaimTypes.Email);
             var team = await _unitOfWork.GetRepository<Team>().GetAllAsync()
                 .Include(t => t.TeamMembers)
                 .FirstOrDefaultAsync(t => t.Id == teamId);
 
-            if (team == null)
+            if ( team == null )
                 return new NotFoundObjectResult("Team not found");
 
-            if (!team.TeamMembers.Any(m => m.Email == userEmail))
+            if ( !team.TeamMembers.Any(m => m.Email == userEmail) )
                 return new ObjectResult("You are not part of this team") { StatusCode = StatusCodes.Status403Forbidden };
 
             await _unitOfWork.GetRepository<Team>().DeleteAsync(team);
@@ -98,14 +98,14 @@ namespace Graduation_Project_Management.Service
         #endregion
 
         #region Get Team By Id
-        public async Task<IActionResult> GetTeamByIdAsync(int id)
+        public async Task<IActionResult> GetTeamByIdAsync( int id )
         {
             var team = await _unitOfWork.GetRepository<Team>().GetAllAsync()
                       .Include(t => t.TeamMembers)
                       .Include(t => t.ProjectIdeas)
                       .FirstOrDefaultAsync(t => t.Id == id);
 
-            if (team == null)
+            if ( team == null )
                 return new NotFoundObjectResult("Team not found");
 
             var result = new GetTeamsDto
@@ -124,7 +124,7 @@ namespace Graduation_Project_Management.Service
         #endregion
 
         #region Update Team Profile
-        public async Task<IActionResult> UpdateTeamProfileAsync(ClaimsPrincipal user, UpdateTeamDto dto)
+        public async Task<IActionResult> UpdateTeamProfileAsync( ClaimsPrincipal user, UpdateTeamDto dto )
         {
             var userEmail = user.FindFirstValue(ClaimTypes.Email);
 
@@ -132,10 +132,10 @@ namespace Graduation_Project_Management.Service
                 .Include(s => s.Team)  // 🔥 لازم Include التيم بتاعه
                 .FirstOrDefaultAsync(s => s.Email == userEmail);
 
-            if (student == null)
+            if ( student == null )
                 return new NotFoundObjectResult("Student not found");
 
-            if (student.Team == null)
+            if ( student.Team == null )
                 return new BadRequestObjectResult("You are not a member of any team");
 
             var team = student.Team;
@@ -148,8 +148,50 @@ namespace Graduation_Project_Management.Service
             await _unitOfWork.SaveChangesAsync();
 
             return new OkObjectResult(new { message = "Team profile updated successfully" });
-            #endregion
         }
+        #endregion
+
+        #region Get Team By StudentId
+        public async Task<IActionResult> GetTeamByStudentIdAsync( int studentId, ClaimsPrincipal user )
+        {
+            var userEmail = user.FindFirstValue(ClaimTypes.Email);
+            var student = await _unitOfWork.GetRepository<Student>().GetAllAsync()
+                .Include(s => s.Team)
+                    .ThenInclude(t => t.TeamMembers)
+                .Include(s => s.Team)
+                    .ThenInclude(t => t.ProjectIdeas)
+                .FirstOrDefaultAsync(s => s.Id == studentId);
+
+            if ( student == null )
+                return new NotFoundObjectResult("Student not found.");
+
+            // Verify that the requesting user is the same student
+            if ( student.Email != userEmail )
+                return new ObjectResult("You are not authorized to view this team.") { StatusCode = StatusCodes.Status403Forbidden };
+
+            if ( student.Team == null )
+                return new NotFoundObjectResult("Student is not part of any team.");
+
+            var team = student.Team;
+            var result = new GetTeamsDto
+            {
+                //StudentName = student.FirstName + " " + student.LastName,
+                Name = team.Name,
+                Description = team.Description,
+                TeamDepartment = team.TeamDepartment,
+                TechStack = team.TechStack,
+                MembersCount = team.TeamMembers.Count,
+                TeamMembers = team.TeamMembers.Select(m => m.FirstName + " " + m.LastName).ToList(),
+                ProjectIdeas = team.ProjectIdeas.Select(p => p.Title).ToList()
+            };
+
+            return new OkObjectResult(result);
+        }
+        #endregion
+
+
+
     }
 }
+
 

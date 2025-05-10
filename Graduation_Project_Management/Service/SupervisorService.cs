@@ -253,7 +253,7 @@ namespace Graduation_Project_Management.Service
                 string content = "";
                 Notification notification = null;
 
-                if (dto.IsApproved)
+                if (dto.IsApproved )
                 {
                     request.Status = ProjectIdeaStatus.Accepted;
                     request.ProjectIdea.SupervisorId = supervisor.Id;

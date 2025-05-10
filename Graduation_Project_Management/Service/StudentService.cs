@@ -27,6 +27,60 @@ namespace Graduation_Project_Management.Service
 
         #endregion Dependencies
 
+
+        #region Get All
+
+        public async Task<IActionResult> GetAllStudentsAsync()
+        {
+            var students = await _unitOfWork.GetRepository<Student>().GetAllAsync().ToListAsync();
+            var studentDtos = students.Select(student => new StudentDto
+            {
+                StudentId = student.Id,
+                FirstName = student.FirstName,
+                LastName = student.LastName,
+                Email = student.Email,
+                PhoneNumber = student.PhoneNumber,
+                Department = student.Department,
+                Gpa = student.Gpa,
+                TechStack = student.TechStack,
+                GithubProfile = student.GithubProfile,
+                LinkedInProfile = student.LinkedInProfile,
+                MainRole = student.MainRole,
+                SecondaryRole = student.SecondaryRole
+            }).ToList();
+            return new OkObjectResult(studentDtos);
+        }
+
+        #endregion Get All
+
+        #region Get  By Id
+
+        public async Task<IActionResult> GetStudentByIdAsync( int id )
+        {
+            var student = await _unitOfWork.GetRepository<Student>().GetByIdAsync(id);
+
+            if ( student == null )
+                return new NotFoundObjectResult("Student not found");
+            var studentDto = new StudentDto
+            {
+                FirstName = student.FirstName,
+                LastName = student.LastName,
+                Email = student.Email,
+                PhoneNumber = student.PhoneNumber,
+                Department = student.Department,
+                Gpa = student.Gpa,
+                TechStack = student.TechStack,
+                GithubProfile = student.GithubProfile,
+                LinkedInProfile = student.LinkedInProfile,
+                MainRole = student.MainRole,
+                SecondaryRole = student.SecondaryRole
+            };
+
+            return new OkObjectResult(studentDto);
+        }
+
+        #endregion Get  By Id
+
         #region Update Student Profile
 
         public async Task<IActionResult> UpdateStudentProfileAsync( ClaimsPrincipal user, UpdateStudentProfileDto dto )
@@ -116,56 +170,6 @@ namespace Graduation_Project_Management.Service
 
         #endregion Delete
 
-        #region Get All
 
-        public async Task<IActionResult> GetAllStudentsAsync()
-        {
-            var students = await _unitOfWork.GetRepository<Student>().GetAllAsync().ToListAsync();
-            var studentDtos = students.Select(student => new StudentDto
-            {
-                FirstName = student.FirstName,
-                LastName = student.LastName,
-                Email = student.Email,
-                PhoneNumber = student.PhoneNumber,
-                Department = student.Department,
-                Gpa = student.Gpa,
-                TechStack = student.TechStack,
-                GithubProfile = student.GithubProfile,
-                LinkedInProfile = student.LinkedInProfile,
-                MainRole = student.MainRole,
-                SecondaryRole = student.SecondaryRole
-            }).ToList();
-            return new OkObjectResult(studentDtos);
-        }
-
-        #endregion Get All
-
-        #region Get  By Id
-
-        public async Task<IActionResult> GetStudentByIdAsync( int id )
-        {
-            var student = await _unitOfWork.GetRepository<Student>().GetByIdAsync(id);
-
-            if ( student == null )
-                return new NotFoundObjectResult("Student not found");
-            var studentDto = new StudentDto
-            {
-                FirstName = student.FirstName,
-                LastName = student.LastName,
-                Email = student.Email,
-                PhoneNumber = student.PhoneNumber,
-                Department = student.Department,
-                Gpa = student.Gpa,
-                TechStack = student.TechStack,
-                GithubProfile = student.GithubProfile,
-                LinkedInProfile = student.LinkedInProfile,
-                MainRole = student.MainRole,
-                SecondaryRole = student.SecondaryRole
-            };
-
-            return new OkObjectResult(studentDto);
-        }
-
-        #endregion Get  By Id
     }
 }

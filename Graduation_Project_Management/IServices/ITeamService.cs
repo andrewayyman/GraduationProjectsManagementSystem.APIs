@@ -11,6 +11,7 @@ namespace Graduation_Project_Management.IServices
         Task<IActionResult> GetAvailableTeamsAsync();
         Task<IActionResult> GetTeamByIdAsync(int id);
         Task<IActionResult> UpdateTeamProfileAsync(ClaimsPrincipal user, UpdateTeamDto dto);
+        Task<IActionResult> GetTeamByStudentIdAsync( int studentId, ClaimsPrincipal user );
 
 
     }
