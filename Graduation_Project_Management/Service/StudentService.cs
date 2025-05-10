@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Graduation_Project_Management.Utilities;
+using Graduation_Project_Management.Errors;
 
 namespace Graduation_Project_Management.Service
 {
@@ -28,11 +29,13 @@ namespace Graduation_Project_Management.Service
         #endregion Dependencies
 
 
-        #region Get All
+        #region GetAllStudents
 
         public async Task<IActionResult> GetAllStudentsAsync()
         {
-            var students = await _unitOfWork.GetRepository<Student>().GetAllAsync().ToListAsync();
+            var students = await _unitOfWork.GetRepository<Student>().GetAllAsync()
+                .Include(s=>s.Team)
+                .ToListAsync();
             var studentDtos = students.Select(student => new StudentDto
             {
                 StudentId = student.Id,
@@ -46,23 +49,37 @@ namespace Graduation_Project_Management.Service
                 GithubProfile = student.GithubProfile,
                 LinkedInProfile = student.LinkedInProfile,
                 MainRole = student.MainRole,
-                SecondaryRole = student.SecondaryRole
+                SecondaryRole = student.SecondaryRole,
+                ProfilePictureUrl = student.ProfilePictureUrl,
+                TeamId = student.Team?.Id,
+                TeamName = student.Team?.Name
             }).ToList();
             return new OkObjectResult(studentDtos);
         }
 
         #endregion Get All
 
-        #region Get  By Id
+        #region GetStudentById
 
-        public async Task<IActionResult> GetStudentByIdAsync( int id )
+        public async Task<IActionResult> GetStudentByIdAsync( int id ,ClaimsPrincipal user)
         {
-            var student = await _unitOfWork.GetRepository<Student>().GetByIdAsync(id);
+            var student = await _unitOfWork.GetRepository<Student>().GetAllAsync()
+                        .Include(s => s.Team)
+                        .FirstOrDefaultAsync(s => s.Id == id);
 
             if ( student == null )
-                return new NotFoundObjectResult("Student not found");
+                return new NotFoundObjectResult(new ApiResponse(404 , "Student Not Found"));
+            
+            var userEmail = user.FindFirstValue(ClaimTypes.Email);
+            var roles = user.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
+
+            if ( student.Email != userEmail && !roles.Contains("Admin") )
+                return new UnauthorizedObjectResult(new ApiResponse(403, "You are not authorized to view this profile"));
+
+
             var studentDto = new StudentDto
             {
+                StudentId = student.Id,
                 FirstName = student.FirstName,
                 LastName = student.LastName,
                 Email = student.Email,
@@ -73,7 +90,10 @@ namespace Graduation_Project_Management.Service
                 GithubProfile = student.GithubProfile,
                 LinkedInProfile = student.LinkedInProfile,
                 MainRole = student.MainRole,
-                SecondaryRole = student.SecondaryRole
+                SecondaryRole = student.SecondaryRole,
+                ProfilePictureUrl = student.ProfilePictureUrl,
+                TeamId = student.Team?.Id ,
+                TeamName = student.Team.Name
             };
 
             return new OkObjectResult(studentDto);
@@ -81,16 +101,21 @@ namespace Graduation_Project_Management.Service
 
         #endregion Get  By Id
 
-        #region Update Student Profile
+        #region UpdateStudent
 
-        public async Task<IActionResult> UpdateStudentProfileAsync( ClaimsPrincipal user, UpdateStudentProfileDto dto )
+        public async Task<IActionResult> UpdateStudentProfileAsync( int studentId, UpdateStudentProfileDto dto, ClaimsPrincipal user )
         {
-            var userEmail = user.FindFirstValue(ClaimTypes.Email);
-            var student = await _unitOfWork.GetRepository<Student>().GetAllAsync()
-                .FirstOrDefaultAsync(s => s.Email == userEmail);
+            var student = await _unitOfWork.GetRepository<Student>().GetByIdAsync(studentId);
 
             if ( student == null )
-                return new NotFoundObjectResult("Student not found");
+                return new NotFoundObjectResult(new ApiResponse(404 , "Student Not Found"));
+           
+            var userEmail = user.FindFirstValue(ClaimTypes.Email);
+
+            var roles = user.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
+            if ( student.Email != userEmail && !roles.Contains("Admin") )
+                return new ObjectResult(new ApiResponse(403, "Unauthorized to update this student."));
+
 
             student.FirstName = dto.FirstName ?? student.FirstName;
             student.LastName = dto.LastName ?? student.LastName;
@@ -98,13 +123,14 @@ namespace Graduation_Project_Management.Service
             student.Department = dto.Department ?? student.Department;
             student.Gpa = dto.Gpa ?? student.Gpa;
             student.TechStack = dto.TechStack ?? student.TechStack;
-            student.GithubProfile = dto.GitHubProfile ?? student.GithubProfile;
+            student.GithubProfile = dto.GithubProfile ?? student.GithubProfile;
             student.LinkedInProfile = dto.LinkedInProfile ?? student.LinkedInProfile;
             student.MainRole = dto.MainRole ?? student.MainRole;
             student.SecondaryRole = dto.SecondaryRole ?? student.SecondaryRole;
+
+
             if ( dto.ProfilePictureUrl != null )
             {
-                // لو فيه صورة قديمة احذفها
                 if ( !string.IsNullOrEmpty(student.ProfilePictureUrl) )
                 {
                     DocumentSetting.DeleteFile("StudentPictures", student.ProfilePictureUrl);
@@ -116,29 +142,36 @@ namespace Graduation_Project_Management.Service
 
             await _unitOfWork.SaveChangesAsync();
 
-            return new OkObjectResult(new { message = "Profile updated successfully" });
+            return new OkObjectResult(new ApiResponse(200 , "Profile updated successfully"));
         }
 
         #endregion Update Student Profile
 
-        #region Delete
+        #region DeleteStudent
 
-        public async Task<IActionResult> DeleteStudentProfileAsync( int studentId )
+        public async Task<IActionResult> DeleteStudentProfileAsync( int studentId, ClaimsPrincipal user )
         {
+            var userEmail = user.FindFirstValue(ClaimTypes.Email);
+            var roles = user.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
+
             var studentRepo = _unitOfWork.GetRepository<Student>();
             var student = await studentRepo.GetAllAsync()
+                .Where(s => s.Id == studentId)
                 .Include(s => s.Team)
                 .Include(s => s.JoinRequests)
-                .FirstOrDefaultAsync(s => s.Id == studentId);
+                .FirstOrDefaultAsync();
+
 
             if ( student == null )
-                return new NotFoundObjectResult("Student not found");
+                return new NotFoundObjectResult(new ApiResponse(404 , "Student Not FOund"));
 
-            // نحضر اليوزر بالاميل
-            var user = await _userManager.FindByEmailAsync(student.Email);
+            // Allow only the Student themselves or Admin
+            if ( student.Email != userEmail && !roles.Contains("Admin") )
+                return new ObjectResult( new ApiResponse(403 , "Unauthorized to delete this student.") ) ;
 
-            if ( user == null )
-                return new NotFoundObjectResult("User not found");
+            var appUser = await _userManager.FindByEmailAsync(student.Email);
+            if ( appUser == null )
+                return new NotFoundObjectResult ( new ApiResponse(404 , "User not found") );
 
             if ( student.Team != null )
             {
@@ -155,19 +188,13 @@ namespace Graduation_Project_Management.Service
             }
 
             await studentRepo.DeleteAsync(student);
-
-            var result = await _userManager.DeleteAsync(user);
-
+            var result = await _userManager.DeleteAsync(appUser);
             if ( !result.Succeeded )
-            {
-                return new BadRequestObjectResult(new { message = "Failed to delete user from Identity." });
-            }
+                return new BadRequestObjectResult(new ApiResponse(404 , "Failed to delete user from Identity."));
 
             await _unitOfWork.SaveChangesAsync();
-
-            return new OkObjectResult(new { message = "Student and user deleted successfully" });
+            return new OkObjectResult(new ApiResponse(200 , "Student and user deleted successfully"));
         }
-
         #endregion Delete
 
 

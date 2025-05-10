@@ -6,10 +6,10 @@ namespace Graduation_Project_Management.IServices
 {
     public interface IStudentService
     {
-        Task<IActionResult> DeleteStudentProfileAsync(int id);
         Task<IActionResult> GetAllStudentsAsync();
-        Task<IActionResult> GetStudentByIdAsync(int id);
-        Task<IActionResult> UpdateStudentProfileAsync(ClaimsPrincipal user, UpdateStudentProfileDto dto);
+        Task<IActionResult> GetStudentByIdAsync(int id , ClaimsPrincipal user);
+        Task<IActionResult> UpdateStudentProfileAsync( int studentId, UpdateStudentProfileDto dto, ClaimsPrincipal user );
+        Task<IActionResult> DeleteStudentProfileAsync( int studentId, ClaimsPrincipal user ); 
     }
 }
 

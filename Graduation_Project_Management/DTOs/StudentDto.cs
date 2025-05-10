@@ -14,5 +14,8 @@
         public string? LinkedInProfile { get; set; }
         public string? MainRole { get; set; }
         public string? SecondaryRole { get; set; }
+        public string? ProfilePictureUrl { get; set; }
+        public int? TeamId { get; set; }
+        public string TeamName { get; set; }
     }
 }

@@ -171,6 +171,9 @@ namespace Graduation_Project_Management.Service
 
             if ( student.Team == null )
                 return new NotFoundObjectResult("Student is not part of any team.");
+            
+            if (studentId != student.Id )
+                return new BadRequestObjectResult("Student ID does not match the logged-in user.");
 
             var team = student.Team;
             var result = new GetTeamsDto
