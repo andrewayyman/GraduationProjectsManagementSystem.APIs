@@ -67,7 +67,7 @@ namespace Graduation_Project_Management.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTeamById( int id)
         {
-            return await _teamService.GetTeamByIdAsync(id);
+            return await _teamService.GetTeamByIdAsync(id,User);
         } 
         #endregion
 
