@@ -93,7 +93,7 @@ namespace Graduation_Project_Management.Service
                 SecondaryRole = student.SecondaryRole,
                 ProfilePictureUrl = student.ProfilePictureUrl,
                 TeamId = student.Team?.Id ,
-                TeamName = student.Team.Name
+                TeamName = student.Team?.Name
             };
 
             return new OkObjectResult(studentDto);

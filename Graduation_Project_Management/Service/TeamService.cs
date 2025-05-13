@@ -175,7 +175,7 @@ namespace Graduation_Project_Management.Service
                 return new ObjectResult(new ApiResponse(403, "You are not authorized to view this team."));
            
             if ( student.Team == null )
-                return new NotFoundObjectResult(new ApiResponse(404, "Student is not part of any team"));
+                return new ObjectResult ( new ApiResponse(200 , "This Student Not Belong to any Team Yet")) ;
 
             if ( studentId != student.Id )
                 return new BadRequestObjectResult(new ApiResponse(400 , "Student ID does not match the logged-in user."));

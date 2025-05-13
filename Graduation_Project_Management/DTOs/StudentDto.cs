@@ -16,6 +16,6 @@
         public string? SecondaryRole { get; set; }
         public string? ProfilePictureUrl { get; set; }
         public int? TeamId { get; set; }
-        public string TeamName { get; set; }
+        public string? TeamName { get; set; }
     }
 }
