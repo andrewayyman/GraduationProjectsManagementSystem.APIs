@@ -2,7 +2,10 @@
 using Domain.Enums;
 using Domain.Repository;
 using Graduation_Project_Management.DTOs;
+using Graduation_Project_Management.DTOs.ProjectIdeasDTOs;
+using Graduation_Project_Management.DTOs.SupervisorDTOs;
 using Graduation_Project_Management.DTOs.TeamsDtos;
+using Graduation_Project_Management.DTOs.TeamsDTOs;
 using Graduation_Project_Management.Errors;
 using Graduation_Project_Management.IServices;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +32,8 @@ namespace Graduation_Project_Management.Service
         {
             var teams = await _unitOfWork.GetRepository<Team>().GetAllAsync()
                 .Include(t => t.TeamMembers)
+                .Include(t => t.ProjectIdeas)
+                    .ThenInclude(p => p.Supervisor)
                 .Where(t => t.TeamMembers.Count < 6)
                 .ToListAsync();
 
@@ -41,7 +46,20 @@ namespace Graduation_Project_Management.Service
                 TechStack = t.TechStack,
                 MembersCount = t.TeamMembers.Count,
                 TeamMembers = t.TeamMembers.Select(m => m.FirstName + " " + m.LastName).ToList(),
-
+                ProjectIdeas = t.ProjectIdeas.Select(p => new ProjectIdeaDto
+                {
+                    ProjectIdeaId = p.Id,
+                    Title = p.Title,
+                    Description = p.Description,
+                    TechStack = p.TechStack,
+                    CreatedAt = p.CreatedAt.ToString("yyyy-MM-dd"),
+                    Status = p.Status.ToString(),
+                    Supervisor = p.Supervisor != null ? new ShortSupervisorDto
+                    {
+                        SupervisorId = p.Supervisor.Id,
+                        Name = p.Supervisor.FirstName + " " + p.Supervisor.LastName
+                    } : null
+                }).ToList()
             }).ToList();
 
             return new OkObjectResult(result);
@@ -130,6 +148,7 @@ namespace Graduation_Project_Management.Service
             var team = await _unitOfWork.GetRepository<Team>().GetAllAsync()
                       .Include(t => t.TeamMembers)
                       .Include(t => t.ProjectIdeas)
+                            .ThenInclude(p => p.Supervisor)
                       .FirstOrDefaultAsync(t => t.Id == id);
 
             if ( team == null )
@@ -149,7 +168,22 @@ namespace Graduation_Project_Management.Service
                 TechStack = team.TechStack,
                 MembersCount = team.TeamMembers.Count,
                 TeamMembers = team.TeamMembers.Select(m => m.FirstName + " " + m.LastName).ToList(),
-                ProjectIdeas = team.ProjectIdeas.Select(p => p.Title).ToList()
+                ProjectIdeas = team.ProjectIdeas.Select(p => new ProjectIdeaDto
+                {
+                    ProjectIdeaId = p.Id,
+                    Title = p.Title,
+                    Description = p.Description,
+                    TechStack = p.TechStack,
+                    CreatedAt = p.CreatedAt.ToString("yyyy-MM-dd"),
+                    Status = p.Status.ToString(),
+                    Supervisor = p.Supervisor != null ? new ShortSupervisorDto
+                    {
+                        SupervisorId = p.Supervisor.Id,
+                        Name = p.Supervisor.FirstName + " " + p.Supervisor.LastName,
+                    } : null
+
+
+                }).ToList()
             };
 
             return new OkObjectResult(result);
@@ -166,6 +200,7 @@ namespace Graduation_Project_Management.Service
                     .ThenInclude(t => t.TeamMembers)
                 .Include(s => s.Team)
                     .ThenInclude(t => t.ProjectIdeas)
+                        .ThenInclude(p => p.Supervisor)
                 .FirstOrDefaultAsync();
 
             if ( student == null )
@@ -191,7 +226,22 @@ namespace Graduation_Project_Management.Service
                 TechStack = team.TechStack,
                 MembersCount = team.TeamMembers.Count,
                 TeamMembers = team.TeamMembers.Select(m => m.FirstName + " " + m.LastName).ToList(),
-                ProjectIdeas = team.ProjectIdeas.Select(p => p.Title).ToList()
+                ProjectIdeas = team.ProjectIdeas.Select(p => new ProjectIdeaDto
+                {
+                    ProjectIdeaId = p.Id,
+                    Title = p.Title,
+                    Description = p.Description,
+                    TechStack = p.TechStack,
+                    CreatedAt = p.CreatedAt.ToString("yyyy-MM-dd"),
+                    Status = p.Status.ToString(),
+                    Supervisor = p.Supervisor != null ? new ShortSupervisorDto
+                    {
+                        SupervisorId = p.Supervisor.Id,
+                        Name = p.Supervisor.FirstName + " " + p.Supervisor.LastName,
+                    } : null
+
+
+                }).ToList()
             };
 
             return new OkObjectResult(result);

@@ -7,12 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Repository.Identity;
 using Graduation_Project_Management.DTOs.SupervisorDTOs;
-using Graduation_Project_Management.DTOs;
 using Graduation_Project_Management.Errors;
 using System.Security.Claims;
 using Domain.Enums;
 using Graduation_Project_Management.Hubs;
 using Microsoft.AspNetCore.SignalR;
+using Graduation_Project_Management.DTOs.ProjectIdeasDTOs;
+using Graduation_Project_Management.DTOs.TeamsDTOs;
 
 namespace Graduation_Project_Management.Service
 {

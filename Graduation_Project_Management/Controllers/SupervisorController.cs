@@ -10,8 +10,8 @@ using Graduation_Project_Management.DTOs.SupervisorDTOs;
 using Graduation_Project_Management.Errors;
 using System.Security.Claims;
 using Domain.Enums;
-using Graduation_Project_Management.DTOs;
 using Graduation_Project_Management.IServices;
+using Graduation_Project_Management.DTOs.ProjectIdeasDTOs;
 
 namespace Graduation_Project_Management.Controllers
 {

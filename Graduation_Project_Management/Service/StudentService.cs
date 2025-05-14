@@ -10,6 +10,7 @@ using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Graduation_Project_Management.Utilities;
 using Graduation_Project_Management.Errors;
+using Graduation_Project_Management.DTOs.StudentDTOs;
 
 namespace Graduation_Project_Management.Service
 {

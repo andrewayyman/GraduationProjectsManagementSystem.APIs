@@ -1,7 +1,8 @@
 ﻿using Domain.Entities;
 using Domain.Enums;
 using Domain.Repository;
-using Graduation_Project_Management.DTOs;
+using Graduation_Project_Management.DTOs.ProjectIdeasDTOs;
+using Graduation_Project_Management.DTOs.TeamsDTOs;
 using Graduation_Project_Management.Hubs;
 using Graduation_Project_Management.IServices;
 using Microsoft.AspNetCore.Mvc;

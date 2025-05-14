@@ -2,7 +2,7 @@
 using Domain.Entities.Identity;
 using Domain.Enums;
 using Domain.Repository;
-using Graduation_Project_Management.DTOs;
+using Graduation_Project_Management.DTOs.TeamsDTOs;
 using Graduation_Project_Management.IServices;
 using Graduation_Project_Management.Service;
 using Microsoft.AspNetCore.Authorization;
