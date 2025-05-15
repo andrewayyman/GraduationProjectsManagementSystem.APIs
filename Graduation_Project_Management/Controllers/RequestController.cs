@@ -22,29 +22,7 @@ namespace Graduation_Project_Management.Controllers
 
         #endregion  Dependencies
 
-        #region Get Join Requests
-
-        [HttpGet("team/{teamId}/join-requests")]
-        [Authorize(Roles = "Student")]
-        public async Task<IActionResult> GetTeamJoinRequests(int teamId)
-        {
-            return await _requestService.GetTeamJoinRequestsAsync(User, teamId);
-        }
-
-        #endregion Get Join Requests
-
-        #region Respond to Join Requests
-
-        [HttpPost("join-requests/{requestId}/respond")]
-        [Authorize(Roles = "Student")]
-        public async Task<IActionResult> RespondToJoinRequest(int requestId, string decision)
-        {
-            return await _requestService.RespondToJoinRequestAsync(User, requestId, decision);
-        }
-
-        #endregion Respond to Join Requests
-
-        #region Join 
+        #region RequestToJoinTeam 
 
         [HttpPost("JoinTeam")]
         [Authorize(Roles = "Student")]
@@ -55,7 +33,28 @@ namespace Graduation_Project_Management.Controllers
 
         #endregion Join Team
 
-        #region Send Idea Request To Supervisor
+        #region RespondToJoinRequest
+
+        [HttpPost("RespondToJoinRequest/{requestId}")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> RespondToJoinRequest(int requestId, string decision)
+        {
+            return await _requestService.RespondToJoinRequestAsync(User, requestId, decision);
+        }
+
+        #endregion Respond to Join Requests
+
+        #region GetTeamJoinRequests
+
+        [HttpGet("team/{teamId}")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> GetTeamJoinRequests(int teamId)
+            => await _requestService.GetTeamJoinRequestsAsync(User, teamId);
+
+
+        #endregion Get Join Requests
+
+        #region RequestToSupervisor
 
         [HttpPost("RequestSupervisor")]
         [Authorize(Roles = "Student")]
@@ -63,5 +62,7 @@ namespace Graduation_Project_Management.Controllers
         => await _requestService.RequestSupervisorAsync(User, dto);
 
         #endregion Send Idea Request To Supervisor
+
+
     }
 }

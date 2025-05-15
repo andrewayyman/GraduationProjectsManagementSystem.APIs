@@ -17,6 +17,7 @@ namespace Domain.Entities
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;                    // date of the project idea
 
+        public DateTime? UpdatedAt { get; set; }
         public ProjectIdeaStatus Status { get; set; } = ProjectIdeaStatus.Pending;
 
         // Relationships

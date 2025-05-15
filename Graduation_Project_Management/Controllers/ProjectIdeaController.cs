@@ -21,6 +21,15 @@ namespace Graduation_Project_Management.Controllers
 
         #endregion  Dependencies
 
+        #region GetAllIdeasByStudentId 
+
+        [HttpGet("{studentId}")]
+         public async Task<IActionResult> GetAllIdeasByStudentId ( int studentId)
+        => await _projectIdeaService.GetAllTeamIdeasByStudentIdAsync(User, studentId);
+
+
+        #endregion
+
         #region Publish Project Idea
 
         [HttpPost("PublishIdea")]
@@ -30,6 +39,13 @@ namespace Graduation_Project_Management.Controllers
 
         #endregion Publish Project Idea
 
+        #region  Update Idea
+        [HttpPut("UpdateIdea/{ideaId}")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> UpdateIdea(int ideaId, [FromBody] PublishProjectIdeaDto dto)
+       => await _projectIdeaService.UpdateIdeaAsync(User, ideaId, dto);
+        #endregion
+
         #region Delete Idea 
         [HttpDelete("DeleteIdea/{ideaId}")]
         [Authorize(Roles = "Student")]
@@ -37,13 +53,6 @@ namespace Graduation_Project_Management.Controllers
         => await _projectIdeaService.DeleteIdeaAsync(User, ideaId);
 
 
-        #endregion
-
-        #region  Update Idea
-        [HttpPut("UpdateIdea/{ideaId}")]
-        [Authorize(Roles = "Student")]
-        public async Task<IActionResult> UpdateIdea(int ideaId, [FromBody] PublishProjectIdeaDto dto)
-       => await _projectIdeaService.UpdateIdeaAsync(User, ideaId, dto);
         #endregion
     }
 }

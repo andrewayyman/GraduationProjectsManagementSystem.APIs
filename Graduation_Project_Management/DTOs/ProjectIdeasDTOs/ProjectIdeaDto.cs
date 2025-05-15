@@ -11,7 +11,7 @@ namespace Graduation_Project_Management.DTOs.ProjectIdeasDTOs
         public List<string> TechStack { get; set; }
         public string CreatedAt { get; set; }
         public string Status { get; set; }
-        public ShortSupervisorDto Supervisor { get; set; }
+        public ShortSupervisorDto? Supervisor { get; set; }
 
     }
 }
