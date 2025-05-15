@@ -30,6 +30,8 @@ namespace Graduation_Project_Management.Service
         }
         #endregion
 
+
+
         #region RequestToJoinTeam
         public async Task<ActionResult> RequestToJoinTeamAsync(ClaimsPrincipal user, TeamJoinRequestDto model)
         {
@@ -136,6 +138,7 @@ namespace Graduation_Project_Management.Service
             }
         } 
         #endregion
+
 
         #region RespondJoinRequest
         public async Task<ActionResult> RespondToJoinRequestAsync(ClaimsPrincipal user, int requestId, string decision)

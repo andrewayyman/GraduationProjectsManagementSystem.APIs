@@ -118,8 +118,11 @@ namespace Graduation_Project_Management.Service
         public async Task<ActionResult> GetSupervisorByEmailAsync(string email)
         {
             var supervisor = await _context.Supervisors
-                .Include(s => s.SupervisedTeams) // فقط لو فيه علاقة ملاحية
+                .Include(s => s.SupervisedTeams) 
                 .FirstOrDefaultAsync(s => s.Email.ToLower() == email.ToLower());
+
+            if ( string.IsNullOrEmpty(email) )
+                return new BadRequestObjectResult(new ApiResponse(400, "Email is required."));
 
             if (supervisor == null)
                 return new NotFoundObjectResult(new ApiResponse(404, "There is no supervisor with this email"));
@@ -150,15 +153,19 @@ namespace Graduation_Project_Management.Service
         } 
         #endregion
 
-
         #region UpdateSupervisor service
 
         public async Task<ActionResult> UpdateSupervisorProfileAsync( int id, UpdateSupervisorDto supervisorDto )
         {
+            if ( !string.IsNullOrEmpty(supervisorDto.Email) && await _unitOfWork.GetRepository<Supervisor>().GetAllAsync().AnyAsync(s => s.Email == supervisorDto.Email && s.Id != id) )
+                return new BadRequestObjectResult(new ApiResponse(400, "Email is already in use."));
+
             // check if the supervisor exists
             var supervisor = await _supervisorRepo.GetByIdAsync(id);
+            
             if ( supervisor == null )
                 return new NotFoundObjectResult(new ApiResponse(404, "There is no any supervisors with this id "));
+
 
             // update the supervisor
             supervisor.FirstName = supervisorDto.FirstName ?? supervisor.FirstName;
@@ -192,6 +199,8 @@ namespace Graduation_Project_Management.Service
             await _supervisorRepo.DeleteAsync(supervisor);
             await _unitOfWork.SaveChangesAsync();
             return new OkObjectResult(new { message = "Profile Deleted Successfully" });
+        
+        
         }
 
         #endregion DeleteSupervisor Service
@@ -216,12 +225,13 @@ namespace Graduation_Project_Management.Service
             {
                 RequestId = r.Id,
                 IdeaId = r.ProjectIdeaId,
-                r.ProjectIdea.Title,
-                r.ProjectIdea.Description,
-                r.ProjectIdea.TechStack,
+                TeamId = r.ProjectIdea.TeamId,
                 r.ProjectIdea.Team?.Name,
                 r.ProjectIdea.Team?.TeamMembers,
                 r.ProjectIdea.Team?.TeamDepartment,
+                r.ProjectIdea.Title,
+                r.ProjectIdea.Description,
+                r.ProjectIdea.TechStack,
                 Status = Enum.GetName(typeof(ProjectIdeaStatus), r.Status),
                 r.CreatedAt
             });
@@ -270,20 +280,43 @@ namespace Graduation_Project_Management.Service
 
         public async Task<ActionResult> HandleIdeaRequestAsync(ClaimsPrincipal user, HandleIdeaRequestDto dto)
         {
+            // get from token
             var email = user.FindFirstValue(ClaimTypes.Email);
-            var supervisor = await _context.Supervisors.FirstOrDefaultAsync(s => s.Email == email);
+
+            var supervisor = await _unitOfWork.GetRepository<Supervisor>()
+                    .GetAllAsync()
+                    .Include(s => s.SupervisedTeams)
+                    .FirstOrDefaultAsync(s => s.Email == email);
 
             if (supervisor == null)
                 return new UnauthorizedObjectResult(new ApiResponse(401, "Supervisor not found."));
 
-            var request = await _context.ProjectIdeasRequest
+            var request = await _unitOfWork.GetRepository<ProjectIdeaRequest>()
+                .GetAllAsync()
                 .Include(r => r.ProjectIdea)
-                .ThenInclude(pi => pi.Team)
-                .ThenInclude(t => t.TeamMembers)
+                    .ThenInclude(pi => pi.Team)
+                        .ThenInclude(t => t.TeamMembers)
                 .FirstOrDefaultAsync(r => r.Id == dto.RequestId && r.SupervisorId == supervisor.Id);
 
-            if (request == null)
-                return new NotFoundObjectResult(new ApiResponse(404, "Request not found"));
+
+            if ( request == null )
+                return new NotFoundObjectResult(new ApiResponse(404, "Request not found or not associated with this supervisor."));
+            
+            // make sure it's pending
+            if ( request.Status != ProjectIdeaStatus.Pending )
+                return new BadRequestObjectResult(new ApiResponse(400, "Request has already been processed."));
+
+            // Validate Project Idea and Team
+            if ( request.ProjectIdea.SupervisorId != null || request.ProjectIdea.Status != ProjectIdeaStatus.Pending )
+                return new BadRequestObjectResult(new ApiResponse(400, "Project idea already has a supervisor or is not in Pending status."));
+
+            if ( request.ProjectIdea.Team.SupervisorId != null )
+                return new BadRequestObjectResult(new ApiResponse(400, "Team already has a supervisor."));
+
+            // Validate Supervisor Capacity (for approval)
+            if ( dto.IsApproved && supervisor.SupervisedTeams?.Count >= supervisor.MaxAssignedTeams )
+                return new BadRequestObjectResult(new ApiResponse(400, "Supervisor has reached the maximum number of assigned teams."));
+
 
             try
             {
@@ -295,8 +328,19 @@ namespace Graduation_Project_Management.Service
                 {
                     request.Status = ProjectIdeaStatus.Accepted;
                     request.ProjectIdea.SupervisorId = supervisor.Id;
-                    request.ProjectIdea.Team.SupervisorId = supervisor.Id;
                     request.ProjectIdea.Status = ProjectIdeaStatus.Accepted;
+                    request.ProjectIdea.Team.SupervisorId = supervisor.Id;
+
+                    // Reject other pending requests for the same project idea
+                    var otherRequests = await _unitOfWork.GetRepository<ProjectIdeaRequest>()
+                        .GetAllAsync()
+                        .Where(r => r.ProjectIdeaId == request.ProjectIdeaId && r.Id != request.Id && r.Status == ProjectIdeaStatus.Pending)
+                        .ToListAsync();
+
+                    foreach ( var otherRequest in otherRequests )
+                    {
+                        otherRequest.Status = ProjectIdeaStatus.Rejected;
+                    }
 
                     title = "Project Idea Request Approved";
                     content = $"Your project idea request for team '{request.ProjectIdea.Team.Name}' has been approved by the supervisor.";
@@ -306,7 +350,7 @@ namespace Graduation_Project_Management.Service
                     request.Status = ProjectIdeaStatus.Rejected;
 
                     title = "Project Idea Request Rejected";
-                    content = $"Your project idea request for team '{request.ProjectIdea.Team.Name}' has been rejected by the supervisor.";
+                    content = $"Your project idea '{request.ProjectIdea.Title}' for team '{request.ProjectIdea.Team.Name}' has been rejected by the supervisor. Reason: {dto.RejectionReason ?? "Not specified."}";
                 }
 
                 // Save changes to update request and project idea
@@ -347,7 +391,17 @@ namespace Graduation_Project_Management.Service
                     }
                 }
 
-                return new OkObjectResult(new { message = $"Request {(dto.IsApproved ? "approved" : "declined")} successfully" });
+                var response = new
+                {
+                    message = $"Request {( dto.IsApproved ? "approved" : "declined" )} successfully" ,
+                    requestId = request.Id,
+                    projectIdeaId = request.ProjectIdeaId,
+                    status = request.Status.ToString()
+                };
+
+                return new OkObjectResult(response);
+            
+            
             }
             catch (Exception ex)
             {
@@ -356,9 +410,16 @@ namespace Graduation_Project_Management.Service
                 {
                     StatusCode = StatusCodes.Status500InternalServerError
                 };
+
+
+
             }
         }
         #endregion HandleRequest Service
+
+       
+
+
 
     }
 }
