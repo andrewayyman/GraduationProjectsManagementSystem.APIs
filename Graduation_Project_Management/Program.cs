@@ -30,12 +30,21 @@ namespace Graduation_Project_Management
             builder.Services.ApplicationServices();
             builder.Services.AddIdentityService(builder.Configuration);
             builder.Services.AddSignalR();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:5173")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                });
+            });
 
             #endregion Services
 
             var app = builder.Build();
 
-            #region Middlewares
 
             #region Update Database
 
@@ -61,13 +70,11 @@ namespace Graduation_Project_Management
 
             #endregion Update Database
 
+            #region Middlewares
+
+
             // Configure CORS
-            app.UseCors(options =>
-            {
-                options.AllowAnyOrigin()
-                       .AllowAnyMethod()
-                       .AllowAnyHeader();
-            });
+        
 
             // Configure the HTTP request pipeline.
             if ( app.Environment.IsDevelopment() )
@@ -80,6 +87,9 @@ namespace Graduation_Project_Management
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseCors("AllowFrontend");
+
 
             app.UseAuthentication();
             app.UseAuthorization();
