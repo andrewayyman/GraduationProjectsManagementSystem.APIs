@@ -1,4 +1,4 @@
-﻿namespace Graduation_Project_Management.DTOs
+﻿namespace Graduation_Project_Management.DTOs.ProjectIdeasDTOs
 {
     public class PublishProjectIdeaDto
     {

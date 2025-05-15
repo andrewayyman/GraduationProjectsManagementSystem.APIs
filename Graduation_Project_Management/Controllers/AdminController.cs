@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Repository.Identity;
 
 namespace Graduation_Project_Management.Controllers
@@ -21,17 +22,15 @@ namespace Graduation_Project_Management.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ITokenService _tokenService;
         private readonly IUnitOfWork _unitOfWork;
-
-
-        public AdminController( UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, ITokenService tokenService,IUnitOfWork unitOfWork )
+        public AdminController( UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, ITokenService tokenService, IUnitOfWork unitOfWork )
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _tokenService = tokenService;
             _unitOfWork = unitOfWork;
         }
+        #endregion
 
-        #endregion Dependencies
 
         #region Register_Supervisor
 
@@ -69,8 +68,16 @@ namespace Graduation_Project_Management.Controllers
             await _unitOfWork.GetRepository<Supervisor>().AddAsync(supervisor);
             await _unitOfWork.SaveChangesAsync();
 
+            // Get SupervisorId
+            var supervisorEntity = await _unitOfWork.GetRepository<Supervisor>().GetAllAsync()
+                .FirstOrDefaultAsync(s => s.UserId == supervisorUser.Id);
+            if ( supervisorEntity == null )
+                return BadRequest("Failed to create supervisor profile.");
+
             var returnedUser = new UserDto()
             {
+                UserId = supervisorEntity.Id,
+                Role = "Supervisor",
                 Email = supervisorUser.Email,
                 FirstName = supervisorUser.FirstName,
                 LastName = supervisorUser.LastName,

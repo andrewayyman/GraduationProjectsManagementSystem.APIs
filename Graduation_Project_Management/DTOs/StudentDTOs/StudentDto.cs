@@ -1,7 +1,8 @@
-﻿namespace Graduation_Project_Management.DTOs
+﻿namespace Graduation_Project_Management.DTOs.StudentDTOs
 {
     public class StudentDto
     {
+        public int StudentId { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Email { get; set; }
@@ -13,5 +14,8 @@
         public string? LinkedInProfile { get; set; }
         public string? MainRole { get; set; }
         public string? SecondaryRole { get; set; }
+        public string? ProfilePictureUrl { get; set; }
+        public int? TeamId { get; set; }
+        public string? TeamName { get; set; }
     }
 }

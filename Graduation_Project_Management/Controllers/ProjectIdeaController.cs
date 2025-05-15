@@ -1,4 +1,4 @@
-﻿using Graduation_Project_Management.DTOs;
+﻿using Graduation_Project_Management.DTOs.ProjectIdeasDTOs;
 using Graduation_Project_Management.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;

@@ -1,4 +1,4 @@
-﻿using Graduation_Project_Management.DTOs;
+﻿using Graduation_Project_Management.DTOs.ProjectIdeasDTOs;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
