@@ -45,6 +45,14 @@ namespace Graduation_Project_Management.Service
                 return new BadRequestObjectResult(new ApiResponse(400, "You are not a member of any team."));
 
 
+            // Check if team has an accepted project idea
+            var hasAcceptedIdea = await _unitOfWork.GetRepository<ProjectIdea>()
+                .GetAllAsync()
+                .AnyAsync(i => i.TeamId == student.Team.Id && i.Status == ProjectIdeaStatus.Accepted);
+
+            if ( hasAcceptedIdea )
+                return new BadRequestObjectResult(new ApiResponse(400, "Your team already has an accepted project idea and cannot publish new ideas."));
+
             var idea = new ProjectIdea
             {
                 Title = dto.Title,

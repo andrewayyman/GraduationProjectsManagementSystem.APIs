@@ -329,6 +329,13 @@ namespace Graduation_Project_Management.Service
             if ( student.Team == null )
                 return new ObjectResult(new ApiResponse(403, "You are not a member of a team.")) { StatusCode = StatusCodes.Status403Forbidden };
 
+            // Check if team has an accepted project idea
+            var hasAcceptedIdea = await _unitOfWork.GetRepository<ProjectIdea>()
+                .GetAllAsync()
+                .AnyAsync(i => i.TeamId == student.Team.Id && i.Status == ProjectIdeaStatus.Accepted);
+
+            if ( hasAcceptedIdea )
+                return new BadRequestObjectResult(new ApiResponse(400, "Your team already has an accepted project idea and cannot request a new supervisor."));
 
             var idea = await _unitOfWork.GetRepository<ProjectIdea>()
                 .GetAllAsync()
