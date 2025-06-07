@@ -248,12 +248,14 @@ namespace Graduation_Project_Management.Service
             var email = user.FindFirstValue(ClaimTypes.Email);
             var supervisor = await _context.Supervisors.FirstOrDefaultAsync(s => s.Email == email);
 
-            // check if the supervisor exists
+            // Check if the supervisor exists
             if ( supervisor == null )
                 return new UnauthorizedObjectResult(new ApiResponse(401, "Supervisor not found."));
 
             var teams = await _context.Teams
                 .Where(t => t.SupervisorId == supervisor.Id)
+                .Include(t => t.ProjectIdeas)
+                .Include(t=>t.TeamMembers)
                 .ToListAsync();
 
             if ( teams == null || !teams.Any() )
@@ -263,16 +265,18 @@ namespace Graduation_Project_Management.Service
             {
                 t.Id,
                 t.Name,
+                ProjectIdeaTitle = t.ProjectIdeas?.FirstOrDefault(pi => pi.Status == ProjectIdeaStatus.Accepted)?.Title,
                 t.Description,
                 t.TeamDepartment,
                 t.IsOpenToJoin,
                 t.MaxMembers,
                 TechStack = string.Join(", ", t.TechStack ?? new List<string>()),
-                TeamMembers = t.TeamMembers?.Select(tm => new { tm.Id, tm.FirstName, tm.LastName }),
-                //CreatedAt = t.CreatedAt
+                TeamMembers = t.TeamMembers?.Select(tm => new { tm.Id, FullName = $"{tm.FirstName} {tm.LastName}", })
             });
+
             return new OkObjectResult(response);
         }
+        
 
         #endregion GetMyTeams Service
 

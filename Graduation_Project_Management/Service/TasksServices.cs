@@ -611,9 +611,9 @@ namespace Graduation_Project_Management.Service
             // cannot move to completed unless InProgress
             if ( newStatus == TaskStatusEnum.Done && task.Status != TaskStatusEnum.InProgress )
                 return new BadRequestObjectResult(new ApiResponse(400, "Task must be InProgress before marking as Done."));
-            if ( newStatus == TaskStatusEnum.Approved || newStatus == TaskStatusEnum.NeedToRevise )
+            if ( newStatus == TaskStatusEnum.Approved || newStatus == TaskStatusEnum.Rejected )
                 return new BadRequestObjectResult(new ApiResponse(400, "Students cannot set Approved or NeedToRevise status."));
-            if ( task.Status == TaskStatusEnum.Approved || task.Status == TaskStatusEnum.NeedToRevise )
+            if ( task.Status == TaskStatusEnum.Approved || task.Status == TaskStatusEnum.Rejected)
                 return new BadRequestObjectResult(new ApiResponse(400, "Task status cannot be changed after being Approved or NeedToRevise."));
 
 
@@ -644,10 +644,189 @@ namespace Graduation_Project_Management.Service
 
         #endregion ChangeTaskStatus Service
 
+        #region SubmitTask Service
+        public async Task<ActionResult> SubmitTaskAsync( int taskId, SubmitTaskDto dto, ClaimsPrincipal user )
+        {
+            // Validate DTO
+            if ( string.IsNullOrWhiteSpace(dto.FileUrl) )
+                return new BadRequestObjectResult(new ApiResponse(400, "File URL is required."));
+            if ( dto.Comments != null && ( dto.Comments.Length < 10 || dto.Comments.Length > 500 ) )
+                return new BadRequestObjectResult(new ApiResponse(400, "Comments must be between 10 and 500 characters if provided."));
 
+            var email = user.FindFirstValue(ClaimTypes.Email);
+            if ( string.IsNullOrEmpty(email) )
+                return new UnauthorizedObjectResult(new ApiResponse(401, "User email not found in claims."));
 
+            var student = await _unitOfWork.GetRepository<Student>()
+                .GetAllAsync()
+                .FirstOrDefaultAsync(s => s.Email == email);
+            if ( student == null )
+                return new UnauthorizedObjectResult(new ApiResponse(401, "Student not found."));
 
+            try
+            {
+                var task = await _unitOfWork.GetRepository<Task>()
+                    .GetAllAsync()
+                    .Include(t => t.AssignedStudent)
+                    .Include(t => t.Team)
+                    .FirstOrDefaultAsync(t => t.Id == taskId && t.AssignedStudentId == student.Id);
+                if ( task == null )
+                    return new NotFoundObjectResult(new ApiResponse(404, "Task not found or not assigned to this student."));
+                if ( task.Status != TaskStatusEnum.InProgress )
+                    return new BadRequestObjectResult(new ApiResponse(400, "Task must be InProgress to submit."));
 
+                var submission = new TaskSubmission
+                {
+                    TaskId = taskId,
+                    FileUrl = dto.FileUrl,
+                    SubmittedAt = DateTime.UtcNow,
+                    Comments = dto.Comments
+                };
+                await _unitOfWork.GetRepository<TaskSubmission>().AddAsync(submission);
+                task.Status = TaskStatusEnum.Approved;
+                await _unitOfWork.SaveChangesAsync();
+
+                var projectIdea = await _unitOfWork.GetRepository<ProjectIdea>()
+                    .GetAllAsync()
+                    .FirstOrDefaultAsync(p => p.TeamId == task.TeamId);
+
+                var response = new
+                {
+                    SubmissionId = submission.Id,
+                    task.Id,
+                    task.Title,
+                    task.Description,
+                    task.Deadline,
+                    Status = task.Status.ToString(),
+                    Team = new { task.Team.Id, Name = task.Team.Name },
+                    Supervisor = new { task.Supervisor.Id, Name = $"{task.Supervisor.FirstName} {task.Supervisor.LastName}" },
+                    AssignedStudent = new { task.AssignedStudent.Id, Name = $"{task.AssignedStudent.FirstName} {task.AssignedStudent.LastName}" },
+                    ProjectIdea = projectIdea != null ? new { projectIdea.Id, Title = projectIdea.Title } : null,
+                    Submission = new { submission.FileUrl, submission.Comments, SubmittedAt = submission.SubmittedAt },
+                    Message = "Task submitted successfully"
+                };
+
+                return new OkObjectResult(response);
+            }
+            catch ( Exception )
+            {
+                return new ObjectResult(new ApiResponse(500, "An error occurred while submitting the task."))
+                {
+                    StatusCode = StatusCodes.Status500InternalServerError
+                };
+            }
+        }
+        #endregion SubmitTask Service
+
+        #region GetTaskSubmissions Service
+        public async Task<ActionResult> GetTaskSubmissionsAsync( int taskId, ClaimsPrincipal user )
+        {
+            var email = user.FindFirstValue(ClaimTypes.Email);
+            if ( string.IsNullOrEmpty(email) )
+                return new UnauthorizedObjectResult(new ApiResponse(401, "User email not found in claims."));
+
+            var supervisor = await _unitOfWork.GetRepository<Supervisor>()
+                .GetAllAsync()
+                .FirstOrDefaultAsync(s => s.Email == email);
+            if ( supervisor == null )
+                return new UnauthorizedObjectResult(new ApiResponse(401, "Supervisor not found."));
+
+            try
+            {
+                var task = await _unitOfWork.GetRepository<Task>()
+                .GetAllAsync()
+                .FirstOrDefaultAsync(t => t.Id == taskId && t.SupervisorId == supervisor.Id);
+                if ( task == null )
+                    return new NotFoundObjectResult(new ApiResponse(404, "Task not found or not assigned to this supervisor."));
+
+                var submissions = await _unitOfWork.GetRepository<TaskSubmission>()
+                    .GetAllAsync()
+                    .Where(s => s.TaskId == taskId)
+                    .Select(s => new TaskSubmissionResponseDto
+                    {
+                        SubmissionId = s.Id,
+                        TaskId = s.TaskId,
+                        FileUrl = s.FileUrl,
+                        Comments = s.Comments,
+                        SubmittedAt = s.SubmittedAt.ToString("yyyy-MM-dd HH:mm:ss")
+                    }).ToListAsync();
+
+                if ( submissions == null || !submissions.Any() )
+                    return new NotFoundObjectResult(new ApiResponse(404, "No submissions found for this task."));
+
+                return new OkObjectResult(submissions);
+            }
+            catch ( Exception )
+            {
+                return new ObjectResult(new ApiResponse(500, "An error occurred while retrieving task submissions."))
+                {
+                    StatusCode = StatusCodes.Status500InternalServerError
+                };
+            }
+        }
+        #endregion GetTaskSubmissions Service
+
+        #region ReassignTask Service
+        public async Task<ActionResult> ReassignTaskAsync( int taskId, ReassignTaskDto dto, ClaimsPrincipal user )
+        {
+            var email = user.FindFirstValue(ClaimTypes.Email);
+            if ( string.IsNullOrEmpty(email) )
+                return new UnauthorizedObjectResult(new ApiResponse(401, "User email not found in claims."));
+
+            var supervisor = await _unitOfWork.GetRepository<Supervisor>()
+                .GetAllAsync()
+                .FirstOrDefaultAsync(s => s.Email == email);
+            if ( supervisor == null )
+                return new UnauthorizedObjectResult(new ApiResponse(401, "Supervisor not found."));
+
+            try
+            {
+                var task = await _unitOfWork.GetRepository<Task>()
+                    .GetAllAsync()
+                    .Include(t => t.Team)
+                        .ThenInclude(t => t.TeamMembers)
+                    .FirstOrDefaultAsync(t => t.Id == taskId && t.SupervisorId == supervisor.Id);
+                if ( task == null )
+                    return new NotFoundObjectResult(new ApiResponse(404, "Task not found or not assigned to this supervisor."));
+
+                if ( !task.Team.TeamMembers.Any(m => m.Id == dto.NewAssignedToId) )
+                    return new BadRequestObjectResult(new ApiResponse(400, "New assigned student is not a member of the team."));
+
+                task.AssignedStudentId = dto.NewAssignedToId;
+                await _unitOfWork.SaveChangesAsync();
+
+                var newStudent = await _unitOfWork.GetRepository<Student>()
+                    .GetAllAsync()
+                    .FirstOrDefaultAsync(s => s.Id == dto.NewAssignedToId);
+                var projectIdea = await _unitOfWork.GetRepository<ProjectIdea>()
+                    .GetAllAsync()
+                    .FirstOrDefaultAsync(p => p.TeamId == task.TeamId);
+
+                var response = new TaskResponseDto
+                {
+                    TaskId = task.Id,
+                    Title = task.Title,
+                    Description = task.Description,
+                    Deadline = task.Deadline,
+                    Status = task.Status.ToString(),
+                    TeamName = task.Team?.Name,
+                    SupervisorName = supervisor != null ? $"{supervisor.FirstName} {supervisor.LastName}" : null,
+                    AssignedStudentName = newStudent != null ? $"{newStudent.FirstName} {newStudent.LastName}" : null,
+                    ProjectIdeaTitle = projectIdea?.Title,
+                    Message = "Task reassigned successfully"
+                };
+
+                return new OkObjectResult(response);
+            }
+            catch ( Exception )
+            {
+                return new ObjectResult(new ApiResponse(500, "An error occurred while reassigning the task."))
+                {
+                    StatusCode = StatusCodes.Status500InternalServerError
+                };
+            }
+        }
+        #endregion ReassignTask Service
 
 
 

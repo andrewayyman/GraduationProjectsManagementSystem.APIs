@@ -12,6 +12,6 @@ namespace Domain.Enums
         InProgress,
         Done,
         Approved,
-        NeedToRevise
+        Rejected
     }
 }
