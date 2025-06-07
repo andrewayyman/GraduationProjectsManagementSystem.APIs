@@ -11,7 +11,7 @@ namespace Domain.Enums
         Backlog,
         InProgress,
         Done,
-        NeedsRevision,
-        Completed
+        Approved,
+        NeedToRevise
     }
 }

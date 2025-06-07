@@ -30,7 +30,7 @@ namespace Graduation_Project_Management.Controllers
 
         [HttpGet]
         public async Task<ActionResult> GetAllTasks()
-        => await _tasksServices.GetAllTasksAsync();
+        => await _tasksServices.GetAllTasksAsync(User);
 
         #endregion GetAllTasks
 
@@ -64,7 +64,7 @@ namespace Graduation_Project_Management.Controllers
 
         [HttpGet("{taskId}")]
         public async Task<ActionResult> GetTaskById( int taskId )
-            => await _tasksServices.GetTaskByIdAsync(taskId);
+            => await _tasksServices.GetTaskByIdAsync(taskId,User);
 
         #endregion GetTaskById
 
@@ -72,7 +72,7 @@ namespace Graduation_Project_Management.Controllers
 
         [HttpGet("team/{teamId}")]
         public async Task<ActionResult> GetTasksByTeamId( int teamId )
-        => await _tasksServices.GetTasksByTeamIdAsync(teamId);
+        => await _tasksServices.GetTasksByTeamIdAsync(teamId, User);
 
         #endregion GetTasksByTeamId
 
@@ -80,7 +80,7 @@ namespace Graduation_Project_Management.Controllers
 
         [HttpGet("supervisor/{supervisorId}")]
         public async Task<ActionResult> GetTasksBySupervisorId( int supervisorId )
-        => await _tasksServices.GetTasksBySupervisorIdAsync(supervisorId);
+        => await _tasksServices.GetTasksBySupervisorIdAsync(supervisorId, User);
 
         #endregion GetTasksBySupervisorId
 
@@ -88,7 +88,7 @@ namespace Graduation_Project_Management.Controllers
 
         [HttpGet("student/{studentId}")]
         public async Task<ActionResult> GetTasksByStudentId( int studentId )
-            => await _tasksServices.GetTasksByStudentIdAsync(studentId);
+            => await _tasksServices.GetTasksByStudentIdAsync(studentId, User);
 
         #endregion GetTasksByStudentId
 
@@ -96,7 +96,7 @@ namespace Graduation_Project_Management.Controllers
 
         [HttpGet("Filter")]
         public async Task<ActionResult> FilterTasks( [FromQuery] TaskFilterDto filter )
-            => await _tasksServices.FilterTasksAsync(filter);
+            => await _tasksServices.FilterTasksAsync(filter,User);
 
         #endregion FilterTasks
 
