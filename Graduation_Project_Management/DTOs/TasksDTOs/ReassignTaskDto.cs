@@ -1,4 +1,4 @@
-﻿namespace Graduation_Project_Management.DTOs.TasksDTOs
+namespace Graduation_Project_Management.DTOs.TasksDTOs
 {
     public class ReassignTaskDto
     {
