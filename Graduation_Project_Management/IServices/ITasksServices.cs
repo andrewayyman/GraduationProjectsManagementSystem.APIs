@@ -29,10 +29,11 @@ namespace Graduation_Project_Management.IServices
 
 
 
-        //Task<ActionResult> SubmitTaskAsync( int taskId, SubmitTaskDto dto, ClaimsPrincipal user );
-        //Task<ActionResult> ReviewTaskAsync( int taskId, ReviewTaskDto dto, ClaimsPrincipal user );
-        //Task<ActionResult> GetTaskSubmissionsAsync( int taskId, ClaimsPrincipal user );
-        //Task<ActionResult> ReassignTaskAsync( int taskId, ReassignTaskDto dto, ClaimsPrincipal user );
+        Task<ActionResult> ReviewTaskAsync( int taskId, ReviewTaskDto dto, ClaimsPrincipal user );
+        Task<ActionResult> SubmitTaskAsync( int taskId, SubmitTaskServiceDto dto, ClaimsPrincipal user
+ );
+
+        Task<ActionResult> ReassignTaskAsync( int taskId, ReassignTaskDto dto, ClaimsPrincipal user );
 
     }
 }
