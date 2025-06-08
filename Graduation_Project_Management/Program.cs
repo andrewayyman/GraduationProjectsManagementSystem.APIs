@@ -41,6 +41,8 @@ namespace Graduation_Project_Management
                 });
             });
 
+            builder.Services.AddHttpClient();
+
             #endregion Services
 
             var app = builder.Build();
