@@ -610,7 +610,7 @@ namespace Graduation_Project_Management.Service
             if ( newStatus == TaskStatusEnum.Done && task.Status != TaskStatusEnum.InProgress )
                 return new BadRequestObjectResult(new ApiResponse(400, "Task must be InProgress before marking as Done."));
             if ( newStatus == TaskStatusEnum.Completed || newStatus == TaskStatusEnum.NeedToRevise )
-                return new BadRequestObjectResult(new ApiResponse(400, "Students cannot set Approved or NeedToRevise status."));
+                return new BadRequestObjectResult(new ApiResponse(400, "Students cannot set Completed or NeedToRevise status."));
             if ( task.Status == TaskStatusEnum.Completed || task.Status == TaskStatusEnum.NeedToRevise )
                 return new BadRequestObjectResult(new ApiResponse(400, "Task status cannot be changed after being Approved or NeedToRevise."));
 
@@ -663,8 +663,8 @@ namespace Graduation_Project_Management.Service
                     .FirstOrDefaultAsync(t => t.Id == taskId && t.SupervisorId == supervisor.Id);
                 if ( task == null )
                     return new NotFoundObjectResult(new ApiResponse(404, "Task not found or not assigned to this supervisor."));
-                if ( task.Status != TaskStatusEnum.Completed )
-                    return new BadRequestObjectResult(new ApiResponse(400, "Task must be Completed to be reviewed."));
+                if ( task.Status != TaskStatusEnum.Done )
+                    return new BadRequestObjectResult(new ApiResponse(400, "Task must be in Done status to be reviewed."));
 
                 task.Status = dto.IsApproved ? TaskStatusEnum.Completed : TaskStatusEnum.NeedToRevise;
                 await _unitOfWork.SaveChangesAsync();
@@ -746,8 +746,8 @@ namespace Graduation_Project_Management.Service
                 SubmittedAt = DateTime.UtcNow
             };
 
-            // Update task status to Completed
-            task.Status = TaskStatusEnum.Completed;
+            // Update task status to Done
+            task.Status = TaskStatusEnum.Done;
 
             // Save submission and task
             try
