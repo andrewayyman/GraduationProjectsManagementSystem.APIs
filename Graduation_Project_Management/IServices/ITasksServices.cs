@@ -35,5 +35,8 @@ namespace Graduation_Project_Management.IServices
 
         Task<ActionResult> ReassignTaskAsync( int taskId, ReassignTaskDto dto, ClaimsPrincipal user );
 
+        Task<ActionResult> MarkProjectAsCompletedAsync( int projectIdeaId, ClaimsPrincipal user );
+        Task<ActionResult> GetCompletedProjectsBySupervisorAsync( int supervisorId, ClaimsPrincipal user );
+
     }
 }

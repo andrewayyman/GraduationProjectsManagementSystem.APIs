@@ -30,5 +30,11 @@ namespace Domain.Entities
         public int? SupervisorId { get; set; }
 
         public Supervisor Supervisor { get; set; }
+
+
+
+        // New fields
+        public bool IsCompleted { get; set; } = false;
+        public DateTime? CompletedAt { get; set; }
     }
 }

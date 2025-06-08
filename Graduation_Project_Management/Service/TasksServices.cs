@@ -955,7 +955,112 @@ namespace Graduation_Project_Management.Service
         }
         #endregion ReassignTask Service
 
+        // Is Project Completed ?
 
+        #region MarkProjectAsCompleted Service
+        public async Task<ActionResult> MarkProjectAsCompletedAsync( int projectIdeaId, ClaimsPrincipal user )
+        {
+            // Validate email from token
+            var email = user.FindFirstValue(ClaimTypes.Email);
+            if ( string.IsNullOrEmpty(email) )
+                return new UnauthorizedObjectResult(new ApiResponse(401, "User email not found in claims."));
+
+            // Check if user is a supervisor
+            var supervisor = await _unitOfWork.GetRepository<Supervisor>()
+                .GetAllAsync()
+                .FirstOrDefaultAsync(s => s.Email == email);
+            if ( supervisor == null )
+                return new UnauthorizedObjectResult(new ApiResponse(401, "Supervisor not found."));
+
+            // Validate project idea
+            var projectIdea = await _unitOfWork.GetRepository<ProjectIdea>()
+                .GetAllAsync()
+                .Include(p => p.Team)
+                .FirstOrDefaultAsync(p => p.Id == projectIdeaId);
+
+            if ( projectIdea == null )
+                return new NotFoundObjectResult(new ApiResponse(404, "Project idea not found."));
+
+            // Validate if the supervisor is assigned to the project's team
+            var team = await _unitOfWork.GetRepository<Team>()
+                .GetAllAsync()
+                .FirstOrDefaultAsync(t => t.Id == projectIdea.TeamId && t.SupervisorId == supervisor.Id);
+            if ( team == null )
+                return new UnauthorizedObjectResult(new ApiResponse(403, "You are not the supervisor of this project."));
+
+            // Check if all tasks are completed
+            var tasks = await _unitOfWork.GetRepository<Task>()
+                .GetAllAsync()
+                .Where(t => t.TeamId == projectIdea.TeamId)
+                .ToListAsync();
+
+            if ( tasks.Any(t => t.Status != TaskStatusEnum.Completed) )
+                return new BadRequestObjectResult(new ApiResponse(400, "All tasks must be in Completed status to mark the project as completed."));
+
+            // Mark project as completed
+            if ( projectIdea.IsCompleted )
+                return new BadRequestObjectResult(new ApiResponse(400, "Project is already marked as completed."));
+
+            projectIdea.IsCompleted = true;
+            projectIdea.CompletedAt = DateTime.UtcNow;
+
+            await _unitOfWork.SaveChangesAsync();
+
+            // Prepare response
+            var response = new
+            {
+                ProjectIdeaId = projectIdea.Id,
+                TeamId = team.Id,
+                Title = projectIdea.Title,
+                TeamName = team.Name,
+                SupervisorName = $"{supervisor.FirstName} {supervisor.LastName}",
+                CompletedAt = projectIdea.CompletedAt,
+                Message = "Project marked as completed successfully"
+            };
+
+            return new OkObjectResult(response);
+        }
+        #endregion MarkProjectAsCompleted Service
+
+        #region GetCompletedProjectsBySupervisor Service
+        public async Task<ActionResult> GetCompletedProjectsBySupervisorAsync( int supervisorId, ClaimsPrincipal user )
+        {
+            // Validate email from token
+            var email = user.FindFirstValue(ClaimTypes.Email);
+            if ( string.IsNullOrEmpty(email) )
+                return new UnauthorizedObjectResult(new ApiResponse(401, "User email not found in claims."));
+
+            // Check if user is the supervisor
+            var supervisor = await _unitOfWork.GetRepository<Supervisor>()
+                .GetAllAsync()
+                .FirstOrDefaultAsync(s => s.Email == email);
+            if ( supervisor == null || supervisor.Id != supervisorId )
+                return new UnauthorizedObjectResult(new ApiResponse(403, "You are not authorized to view these projects."));
+
+            // Get completed projects
+            var projects = await _unitOfWork.GetRepository<ProjectIdea>()
+                .GetAllAsync()
+                .Include(p => p.Team)
+                .Where(p => p.IsCompleted && p.Team.SupervisorId == supervisorId)
+                .ToListAsync();
+
+            if ( projects == null || !projects.Any() )
+                return new NotFoundObjectResult(new ApiResponse(404, $"No completed projects found for supervisor ID {supervisorId}."));
+
+            var response = projects.Select(p => new
+            {
+                ProjectIdeaId = p.Id,
+                Title = p.Title,
+                Description = p.Description,
+                TechStack = p.TechStack,
+                TeamName = p.Team?.Name,
+                CompletedAt = p.CompletedAt,
+                Message = "Completed project retrieved successfully"
+            }).ToList();
+
+            return new OkObjectResult(response);
+        }
+        #endregion GetCompletedProjectsBySupervisor Service
 
 
 

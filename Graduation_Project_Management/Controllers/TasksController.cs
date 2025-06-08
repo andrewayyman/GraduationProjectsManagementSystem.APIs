@@ -215,5 +215,26 @@ namespace Graduation_Project_Management.Controllers
         }
         #endregion ReassignTask
 
+
+
+        #region MarkProjectAsCompleted
+        
+        [HttpPost("Project/{projectIdeaId}/Complete")]
+        [Authorize(Roles = "Supervisor")]
+        public async Task<ActionResult> MarkProjectAsCompleted( int projectIdeaId )
+            => await _tasksServices.MarkProjectAsCompletedAsync(projectIdeaId, User);
+
+
+        #endregion MarkProjectAsCompleted
+
+        
+        #region GetCompletedProjectsBySupervisor
+        
+        [HttpGet("Supervisor/{supervisorId}/CompletedProjects")]
+        [Authorize(Roles = "Supervisor")]
+        public async Task<ActionResult> GetCompletedProjectsBySupervisor( int supervisorId )
+            => await _tasksServices.GetCompletedProjectsBySupervisorAsync(supervisorId, User);
+        
+        #endregion GetCompletedProjectsBySupervisor
     }
 }
