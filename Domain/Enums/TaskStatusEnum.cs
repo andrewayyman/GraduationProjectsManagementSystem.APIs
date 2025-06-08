@@ -10,8 +10,8 @@ namespace Domain.Enums
     {
         Backlog,
         InProgress,
-        Done,
+        Completed,
         Approved,
-        NeedToRevise
+        Rejected
     }
 }
