@@ -34,25 +34,23 @@ namespace Graduation_Project_Management.Service
 
         #region GetAllTasks Service
 
-        public async Task<ActionResult> GetAllTasksAsync( ClaimsPrincipal user )
+        public async Task<ActionResult> GetAllTasksAsync(ClaimsPrincipal user)
         {
             var userEmail = user.FindFirstValue(ClaimTypes.Email);
-            if (string.IsNullOrEmpty(userEmail) )
+            if (string.IsNullOrEmpty(userEmail))
                 return new BadRequestObjectResult(new ApiResponse(400, "User email not found in token."));
 
-
             var tasks = await _tasksRepo.GetAllAsync()
-           .Include(t => t.Team)
-           .Include(t => t.Supervisor)
-           .Include(t => t.AssignedStudent)
-           .ToListAsync();
+                .Include(t => t.Team)
+                .Include(t => t.Supervisor)
+                .Include(t => t.AssignedStudent)
+                .ToListAsync();
 
-            if ( tasks == null || !tasks.Any() )
-                return new NotFoundObjectResult(new ApiResponse(404, "No tasks found."));
+            if (tasks == null || !tasks.Any())
+                return new OkObjectResult(new { });
 
             var response = tasks.Select(async t =>
             {
-                // Get the project idea by team id
                 var projectIdea = await _context.ProjectIdeas
                     .FirstOrDefaultAsync(p => p.TeamId == t.TeamId);
 
@@ -289,7 +287,7 @@ namespace Graduation_Project_Management.Service
                        ( supervisor != null ? t.SupervisorId == supervisor.Id : t.TeamId == student.Team.Id ));
 
             if ( task == null )
-                return new NotFoundObjectResult(new ApiResponse(404, "Task not found."));
+                return new OkObjectResult(new { });
 
 
             // Get the project idea by team id
@@ -609,11 +607,11 @@ namespace Graduation_Project_Management.Service
 
 
             // cannot move to completed unless InProgress
-            if ( newStatus == TaskStatusEnum.Completed && task.Status != TaskStatusEnum.InProgress )
+            if ( newStatus == TaskStatusEnum.Done && task.Status != TaskStatusEnum.InProgress )
                 return new BadRequestObjectResult(new ApiResponse(400, "Task must be InProgress before marking as Done."));
-            if ( newStatus == TaskStatusEnum.Approved || newStatus == TaskStatusEnum.Rejected )
+            if ( newStatus == TaskStatusEnum.Completed || newStatus == TaskStatusEnum.NeedToRevise )
                 return new BadRequestObjectResult(new ApiResponse(400, "Students cannot set Approved or NeedToRevise status."));
-            if ( task.Status == TaskStatusEnum.Approved || task.Status == TaskStatusEnum.Rejected )
+            if ( task.Status == TaskStatusEnum.Completed || task.Status == TaskStatusEnum.NeedToRevise )
                 return new BadRequestObjectResult(new ApiResponse(400, "Task status cannot be changed after being Approved or NeedToRevise."));
 
 
@@ -668,7 +666,7 @@ namespace Graduation_Project_Management.Service
                 if ( task.Status != TaskStatusEnum.Completed )
                     return new BadRequestObjectResult(new ApiResponse(400, "Task must be Completed to be reviewed."));
 
-                task.Status = dto.IsApproved ? TaskStatusEnum.Approved : TaskStatusEnum.Rejected;
+                task.Status = dto.IsApproved ? TaskStatusEnum.Completed : TaskStatusEnum.NeedToRevise;
                 await _unitOfWork.SaveChangesAsync();
 
                 var projectIdea = await _unitOfWork.GetRepository<ProjectIdea>()
