@@ -194,6 +194,15 @@ namespace Graduation_Project_Management.Controllers
         }
         #endregion SubmitTask
 
+        #region GetTaskSubmission
+
+        [HttpGet("{taskId}/submission")]
+        [Authorize(Roles = "Supervisor,Student")]
+        public async Task<ActionResult> GetTaskSubmission( int taskId )
+            => await _tasksServices.GetTaskSubmissionAsync(taskId, User);
+
+        #endregion GetTaskSubmission
+
         #region ReassignTask
         [HttpPut("{taskId}/reassign")]
         [Authorize(Roles = "Supervisor")]

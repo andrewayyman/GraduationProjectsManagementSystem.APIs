@@ -30,8 +30,8 @@ namespace Graduation_Project_Management.IServices
 
 
         Task<ActionResult> ReviewTaskAsync( int taskId, ReviewTaskDto dto, ClaimsPrincipal user );
-        Task<ActionResult> SubmitTaskAsync( int taskId, SubmitTaskServiceDto dto, ClaimsPrincipal user
- );
+        Task<ActionResult> SubmitTaskAsync( int taskId, SubmitTaskServiceDto dto, ClaimsPrincipal user);
+        Task<ActionResult> GetTaskSubmissionAsync( int taskId, ClaimsPrincipal user );
 
         Task<ActionResult> ReassignTaskAsync( int taskId, ReassignTaskDto dto, ClaimsPrincipal user );
 
