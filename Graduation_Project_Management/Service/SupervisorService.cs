@@ -217,7 +217,8 @@ namespace Graduation_Project_Management.Service
 
             var requests = await _context.ProjectIdeasRequest
                 .Include(r => r.ProjectIdea)
-                .Include(r => r.ProjectIdea.Team)
+                    .ThenInclude(pi => pi.Team)
+                        .ThenInclude(t => t.TeamMembers) // Include TeamMembers
                 .Where(r => r.SupervisorId == supervisor.Id && r.Status == ProjectIdeaStatus.Pending)
                 .ToListAsync();
 
@@ -225,13 +226,17 @@ namespace Graduation_Project_Management.Service
             {
                 RequestId = r.Id,
                 IdeaId = r.ProjectIdeaId,
-                TeamId = r.ProjectIdea.TeamId,
-                r.ProjectIdea.Team?.Name,
-                r.ProjectIdea.Team?.TeamMembers,
-                r.ProjectIdea.Team?.TeamDepartment,
-                r.ProjectIdea.Title,
-                r.ProjectIdea.Description,
-                r.ProjectIdea.TechStack,
+                TeamId = r.ProjectIdea?.TeamId,
+                TeamName = r.ProjectIdea?.Team?.Name,
+                TeamMembers = r.ProjectIdea?.Team?.TeamMembers?.Select(m => new
+                {
+                    m.Id,
+                    Name = $"{m.FirstName} {m.LastName}"
+                }) ?? Enumerable.Empty<object>(),
+                TeamDepartment = r.ProjectIdea?.Team?.TeamDepartment,
+                ProjectIdeaTitle = r.ProjectIdea?.Title,
+                ProjectIdeaDescription = r.ProjectIdea?.Description,
+                ProjectIdeaTechStack = r.ProjectIdea?.TechStack,
                 Status = Enum.GetName(typeof(ProjectIdeaStatus), r.Status),
                 r.CreatedAt
             });

@@ -34,6 +34,7 @@ namespace Repository.Identity
         public DbSet<Message> Messages { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Meeting> Meetings { get; set; }
+        public DbSet<TaskSubmission> TaskSubmissions { get; set; }
 
     }
 }

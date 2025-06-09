@@ -1,4 +1,4 @@
-﻿using Domain.Repository;
+using Domain.Repository;
 using Graduation_Project_Management.DTOs.TasksDTOs;
 using Graduation_Project_Management.IServices;
 using Repository;
@@ -34,25 +34,23 @@ namespace Graduation_Project_Management.Service
 
         #region GetAllTasks Service
 
-        public async Task<ActionResult> GetAllTasksAsync( ClaimsPrincipal user )
+        public async Task<ActionResult> GetAllTasksAsync(ClaimsPrincipal user)
         {
             var userEmail = user.FindFirstValue(ClaimTypes.Email);
-            if (string.IsNullOrEmpty(userEmail) )
+            if (string.IsNullOrEmpty(userEmail))
                 return new BadRequestObjectResult(new ApiResponse(400, "User email not found in token."));
 
-
             var tasks = await _tasksRepo.GetAllAsync()
-           .Include(t => t.Team)
-           .Include(t => t.Supervisor)
-           .Include(t => t.AssignedStudent)
-           .ToListAsync();
+                .Include(t => t.Team)
+                .Include(t => t.Supervisor)
+                .Include(t => t.AssignedStudent)
+                .ToListAsync();
 
-            if ( tasks == null || !tasks.Any() )
-                return new NotFoundObjectResult(new ApiResponse(404, "No tasks found."));
+            if (tasks == null || !tasks.Any())
+                return new OkObjectResult(new { });
 
             var response = tasks.Select(async t =>
             {
-                // Get the project idea by team id
                 var projectIdea = await _context.ProjectIdeas
                     .FirstOrDefaultAsync(p => p.TeamId == t.TeamId);
 
@@ -289,7 +287,7 @@ namespace Graduation_Project_Management.Service
                        ( supervisor != null ? t.SupervisorId == supervisor.Id : t.TeamId == student.Team.Id ));
 
             if ( task == null )
-                return new NotFoundObjectResult(new ApiResponse(404, "Task not found."));
+                return new OkObjectResult(new { });
 
 
             // Get the project idea by team id
@@ -611,9 +609,9 @@ namespace Graduation_Project_Management.Service
             // cannot move to completed unless InProgress
             if ( newStatus == TaskStatusEnum.Done && task.Status != TaskStatusEnum.InProgress )
                 return new BadRequestObjectResult(new ApiResponse(400, "Task must be InProgress before marking as Done."));
-            if ( newStatus == TaskStatusEnum.Approved || newStatus == TaskStatusEnum.Rejected )
-                return new BadRequestObjectResult(new ApiResponse(400, "Students cannot set Approved or NeedToRevise status."));
-            if ( task.Status == TaskStatusEnum.Approved || task.Status == TaskStatusEnum.Rejected)
+            if ( newStatus == TaskStatusEnum.Completed || newStatus == TaskStatusEnum.NeedToRevise )
+                return new BadRequestObjectResult(new ApiResponse(400, "Students cannot set Completed or NeedToRevise status."));
+            if ( task.Status == TaskStatusEnum.Completed || task.Status == TaskStatusEnum.NeedToRevise )
                 return new BadRequestObjectResult(new ApiResponse(400, "Task status cannot be changed after being Approved or NeedToRevise."));
 
 
@@ -644,82 +642,8 @@ namespace Graduation_Project_Management.Service
 
         #endregion ChangeTaskStatus Service
 
-        #region SubmitTask Service
-        public async Task<ActionResult> SubmitTaskAsync( int taskId, SubmitTaskDto dto, ClaimsPrincipal user )
-        {
-            // Validate DTO
-            if ( string.IsNullOrWhiteSpace(dto.FileUrl) )
-                return new BadRequestObjectResult(new ApiResponse(400, "File URL is required."));
-            if ( dto.Comments != null && ( dto.Comments.Length < 10 || dto.Comments.Length > 500 ) )
-                return new BadRequestObjectResult(new ApiResponse(400, "Comments must be between 10 and 500 characters if provided."));
-
-            var email = user.FindFirstValue(ClaimTypes.Email);
-            if ( string.IsNullOrEmpty(email) )
-                return new UnauthorizedObjectResult(new ApiResponse(401, "User email not found in claims."));
-
-            var student = await _unitOfWork.GetRepository<Student>()
-                .GetAllAsync()
-                .FirstOrDefaultAsync(s => s.Email == email);
-            if ( student == null )
-                return new UnauthorizedObjectResult(new ApiResponse(401, "Student not found."));
-
-            try
-            {
-                var task = await _unitOfWork.GetRepository<Task>()
-                    .GetAllAsync()
-                    .Include(t => t.AssignedStudent)
-                    .Include(t => t.Team)
-                    .FirstOrDefaultAsync(t => t.Id == taskId && t.AssignedStudentId == student.Id);
-                if ( task == null )
-                    return new NotFoundObjectResult(new ApiResponse(404, "Task not found or not assigned to this student."));
-                if ( task.Status != TaskStatusEnum.InProgress )
-                    return new BadRequestObjectResult(new ApiResponse(400, "Task must be InProgress to submit."));
-
-                var submission = new TaskSubmission
-                {
-                    TaskId = taskId,
-                    FileUrl = dto.FileUrl,
-                    SubmittedAt = DateTime.UtcNow,
-                    Comments = dto.Comments
-                };
-                await _unitOfWork.GetRepository<TaskSubmission>().AddAsync(submission);
-                task.Status = TaskStatusEnum.Approved;
-                await _unitOfWork.SaveChangesAsync();
-
-                var projectIdea = await _unitOfWork.GetRepository<ProjectIdea>()
-                    .GetAllAsync()
-                    .FirstOrDefaultAsync(p => p.TeamId == task.TeamId);
-
-                var response = new
-                {
-                    SubmissionId = submission.Id,
-                    task.Id,
-                    task.Title,
-                    task.Description,
-                    task.Deadline,
-                    Status = task.Status.ToString(),
-                    Team = new { task.Team.Id, Name = task.Team.Name },
-                    Supervisor = new { task.Supervisor.Id, Name = $"{task.Supervisor.FirstName} {task.Supervisor.LastName}" },
-                    AssignedStudent = new { task.AssignedStudent.Id, Name = $"{task.AssignedStudent.FirstName} {task.AssignedStudent.LastName}" },
-                    ProjectIdea = projectIdea != null ? new { projectIdea.Id, Title = projectIdea.Title } : null,
-                    Submission = new { submission.FileUrl, submission.Comments, SubmittedAt = submission.SubmittedAt },
-                    Message = "Task submitted successfully"
-                };
-
-                return new OkObjectResult(response);
-            }
-            catch ( Exception )
-            {
-                return new ObjectResult(new ApiResponse(500, "An error occurred while submitting the task."))
-                {
-                    StatusCode = StatusCodes.Status500InternalServerError
-                };
-            }
-        }
-        #endregion SubmitTask Service
-
-        #region GetTaskSubmissions Service
-        public async Task<ActionResult> GetTaskSubmissionsAsync( int taskId, ClaimsPrincipal user )
+        #region ReviewTask Service
+        public async Task<ActionResult> ReviewTaskAsync( int taskId, ReviewTaskDto dto, ClaimsPrincipal user )
         {
             var email = user.FindFirstValue(ClaimTypes.Email);
             if ( string.IsNullOrEmpty(email) )
@@ -734,37 +658,240 @@ namespace Graduation_Project_Management.Service
             try
             {
                 var task = await _unitOfWork.GetRepository<Task>()
-                .GetAllAsync()
-                .FirstOrDefaultAsync(t => t.Id == taskId && t.SupervisorId == supervisor.Id);
+                    .GetAllAsync()
+                    .Include(t => t.AssignedStudent)
+                    .Include(t => t.Team)
+                    .FirstOrDefaultAsync(t => t.Id == taskId && t.SupervisorId == supervisor.Id);
+               
+                
                 if ( task == null )
                     return new NotFoundObjectResult(new ApiResponse(404, "Task not found or not assigned to this supervisor."));
+                if ( task.Status != TaskStatusEnum.Done )
+                    return new BadRequestObjectResult(new ApiResponse(400, "Task must be in Done status to be reviewed."));
 
-                var submissions = await _unitOfWork.GetRepository<TaskSubmission>()
+                task.Status = dto.IsApproved ? TaskStatusEnum.Completed : TaskStatusEnum.NeedToRevise;
+                await _unitOfWork.SaveChangesAsync();
+
+                var projectIdea = await _unitOfWork.GetRepository<ProjectIdea>()
                     .GetAllAsync()
-                    .Where(s => s.TaskId == taskId)
-                    .Select(s => new TaskSubmissionResponseDto
-                    {
-                        SubmissionId = s.Id,
-                        TaskId = s.TaskId,
-                        FileUrl = s.FileUrl,
-                        Comments = s.Comments,
-                        SubmittedAt = s.SubmittedAt.ToString("yyyy-MM-dd HH:mm:ss")
-                    }).ToListAsync();
+                    .FirstOrDefaultAsync(p => p.TeamId == task.TeamId);
 
-                if ( submissions == null || !submissions.Any() )
-                    return new NotFoundObjectResult(new ApiResponse(404, "No submissions found for this task."));
+                var response = new TaskResponseDto
+                {
+                    TaskId = task.Id,
+                    Title = task.Title,
+                    Description = task.Description,
+                    Deadline = task.Deadline,
+                    Status = task.Status.ToString(),
+                    TeamName = task.Team?.Name,
+                    SupervisorName = supervisor != null ? $"{supervisor.FirstName} {supervisor.LastName}" : null,
+                    AssignedStudentName = task.AssignedStudent != null ? $"{task.AssignedStudent.FirstName} {task.AssignedStudent.LastName}" : null,
+                    ProjectIdeaTitle = projectIdea?.Title,
+                    Message = $"Task {( dto.IsApproved ? "approved" : "rejected" )} successfully"
+                };
 
-                return new OkObjectResult(submissions);
+                return new OkObjectResult(response);
             }
             catch ( Exception )
-            {
-                return new ObjectResult(new ApiResponse(500, "An error occurred while retrieving task submissions."))
+            {   
+                return new ObjectResult(new ApiResponse(500, "An error occurred while reviewing the task."))
                 {
                     StatusCode = StatusCodes.Status500InternalServerError
                 };
             }
         }
-        #endregion GetTaskSubmissions Service
+        #endregion ReviewTask Service
+
+        #region SubmitTask Service
+        public async Task<ActionResult> SubmitTaskAsync( int taskId, SubmitTaskServiceDto dto, ClaimsPrincipal user )
+        {
+            // Validate: At least one of FilePath or RepoLink must be provided
+            if ( string.IsNullOrWhiteSpace(dto.FilePath) && string.IsNullOrWhiteSpace(dto.RepoLink) )
+                return new BadRequestObjectResult(new ApiResponse(400, "At least one of FilePath or RepoLink is required"));
+
+            // Get email from token
+            var email = user.FindFirstValue(ClaimTypes.Email);
+            if ( string.IsNullOrEmpty(email) )
+                return new UnauthorizedObjectResult(new ApiResponse(401, "User email not found in claims."));
+
+            // Find student by email
+            var student = await _context.Students
+                .FirstOrDefaultAsync(s => s.Email == email);
+            if ( student == null )
+                return new NotFoundObjectResult(new ApiResponse(404, "Student not found from token."));
+
+            var studentId = student.Id; // int Id from Students table
+
+            // Validate task
+            var task = await _context.Tasks
+                .Include(t => t.AssignedStudent)
+                .Include(t => t.Team)
+                    .ThenInclude(t => t.ProjectIdeas)
+                .Include(t => t.Supervisor)
+                .FirstOrDefaultAsync(t => t.Id == taskId);
+
+            if ( task == null )
+                return new NotFoundObjectResult(new ApiResponse(404, "Task not found"));
+
+            // Allow submission if task is InProgress or NeedToRevise
+            if ( task.Status != TaskStatusEnum.InProgress && task.Status != TaskStatusEnum.NeedToRevise )
+                return new BadRequestObjectResult(new ApiResponse(400, "Task must be InProgress or NeedToRevise to submit."));
+
+            if ( task.AssignedStudentId != studentId )
+                return new UnauthorizedObjectResult(new ApiResponse(403, "You are not authorized to submit this task"));
+
+            // Check if there's an existing submission
+            var existingSubmission = await _context.TaskSubmissions
+                .FirstOrDefaultAsync(s => s.TaskId == taskId);
+
+            TaskSubmission submission;
+            if ( existingSubmission != null )
+            {
+                // Update existing submission
+                existingSubmission.FilePath = dto.FilePath;
+                existingSubmission.Comments = dto.Comments;
+                existingSubmission.RepoLink = dto.RepoLink;
+                existingSubmission.SubmittedAt = DateTime.UtcNow;
+                submission = existingSubmission;
+            }
+            else
+            {
+                // Create new submission
+                submission = new TaskSubmission
+                {
+                    TaskId = taskId,
+                    FilePath = dto.FilePath,
+                    Comments = dto.Comments,
+                    RepoLink = dto.RepoLink,
+                    SubmittedAt = DateTime.UtcNow
+                };
+                _context.TaskSubmissions.Add(submission);
+            }
+
+            // Update task status to Done
+            task.Status = TaskStatusEnum.Done;
+
+            // Save changes
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch ( DbUpdateException ex )
+            {
+                var innerExceptionMessage = ex.InnerException?.Message ?? ex.Message;
+                return new ObjectResult(new ApiResponse(500, $"Error saving task submission: {innerExceptionMessage}"))
+                {
+                    StatusCode = StatusCodes.Status500InternalServerError
+                };
+            }
+            catch ( Exception ex )
+            {
+                return new ObjectResult(new ApiResponse(500, $"Unexpected error: {ex.Message}"))
+                {
+                    StatusCode = StatusCodes.Status500InternalServerError
+                };
+            }
+
+            // Prepare response
+            var projectIdea = task?.Team?.ProjectIdeas?.FirstOrDefault(pi => pi.Status == ProjectIdeaStatus.Accepted);
+            var response = new
+            {
+                SubmissionId = submission.Id,
+                Id = task.Id,
+                Title = task.Title,
+                Description = task.Description,
+                Deadline = task.Deadline,
+                Status = task.Status.ToString(),
+                Team = new { task?.Team?.Id, task?.Team?.Name },
+                Supervisor = new { task?.Supervisor?.Id, Name = $"{task?.Supervisor?.FirstName} {task?.Supervisor?.LastName}" },
+                AssignedStudent = new { task?.AssignedStudent?.Id, Name = $"{task?.AssignedStudent?.FirstName} {task?.AssignedStudent?.LastName}" },
+                ProjectIdea = projectIdea != null ? new { projectIdea.Id, projectIdea.Title } : null,
+                Submission = new
+                {
+                    submission.FilePath,
+                    submission.Comments,
+                    submission.RepoLink,
+                    submission.SubmittedAt
+                },
+                Message = "Task submitted successfully"
+            };
+
+            return new OkObjectResult(response);
+        }
+
+        #endregion SubmitTask Service
+
+        #region GetTaskSubmission Service
+
+        public async Task<ActionResult> GetTaskSubmissionAsync( int taskId, ClaimsPrincipal user )
+        {
+            // Validate email from token
+            var email = user.FindFirstValue(ClaimTypes.Email);
+            if ( string.IsNullOrEmpty(email) )
+                return new UnauthorizedObjectResult(new ApiResponse(401, "User email not found in claims."));
+
+            // Check if user is a supervisor or student
+            var supervisor = await _unitOfWork.GetRepository<Supervisor>()
+                .GetAllAsync()
+                .FirstOrDefaultAsync(s => s.Email == email);
+
+            var student = supervisor == null ? await _unitOfWork.GetRepository<Student>()
+                .GetAllAsync()
+                .Include(s => s.Team)
+                .FirstOrDefaultAsync(s => s.Email == email) : null;
+
+            if ( supervisor == null && student == null )
+                return new UnauthorizedObjectResult(new ApiResponse(401, "User not found."));
+
+            // Validate task and authorization
+            var task = await _unitOfWork.GetRepository<Task>()
+                .GetAllAsync()
+                .Include(t => t.Team)
+                    .ThenInclude(t => t.ProjectIdeas)
+                .Include(t => t.Supervisor)
+                .Include(t => t.AssignedStudent)
+                .FirstOrDefaultAsync(t => t.Id == taskId &&
+                    ( supervisor != null ? t.SupervisorId == supervisor.Id : student != null && t.AssignedStudentId == student.Id ));
+
+            if ( task == null )
+                return new NotFoundObjectResult(new ApiResponse(404, "Task not found or you are not authorized to view it."));
+
+            // Get task submission
+            var submission = await _context.TaskSubmissions
+                .FirstOrDefaultAsync(s => s.TaskId == taskId);
+
+            if ( submission == null )
+                return new OkObjectResult( new  { } );
+
+            // Prepare response
+            var projectIdea = task.Team?.ProjectIdeas?.FirstOrDefault(pi => pi.Status == ProjectIdeaStatus.Accepted);
+            var response = new
+            {
+                SubmissionId = submission.Id,
+                TaskId = task.Id,
+                Title = task.Title,
+                Description = task.Description,
+                Deadline = task.Deadline,
+                Status = task.Status.ToString(),
+                Team = new { task.Team?.Id, task.Team?.Name },
+                Supervisor = new { task.Supervisor?.Id, Name = $"{task.Supervisor?.FirstName} {task.Supervisor?.LastName}" },
+                AssignedStudent = new { task.AssignedStudent?.Id, Name = $"{task.AssignedStudent?.FirstName} {task.AssignedStudent?.LastName}" },
+                ProjectIdea = projectIdea != null ? new { projectIdea.Id, projectIdea.Title } : null,
+                Submission = new
+                {
+                    submission.FilePath,
+                    submission.Comments,
+                    submission.RepoLink,
+                    submission.SubmittedAt
+                },
+                Message = "Task submission retrieved successfully"
+            };
+
+            return new OkObjectResult(response);
+        }
+
+
+        #endregion GetTaskSubmission Service
 
         #region ReassignTask Service
         public async Task<ActionResult> ReassignTaskAsync( int taskId, ReassignTaskDto dto, ClaimsPrincipal user )
@@ -827,6 +954,113 @@ namespace Graduation_Project_Management.Service
             }
         }
         #endregion ReassignTask Service
+
+        // Is Project Completed ?
+
+        #region MarkProjectAsCompleted Service
+        public async Task<ActionResult> MarkProjectAsCompletedAsync( int projectIdeaId, ClaimsPrincipal user )
+        {
+            // Validate email from token
+            var email = user.FindFirstValue(ClaimTypes.Email);
+            if ( string.IsNullOrEmpty(email) )
+                return new UnauthorizedObjectResult(new ApiResponse(401, "User email not found in claims."));
+
+            // Check if user is a supervisor
+            var supervisor = await _unitOfWork.GetRepository<Supervisor>()
+                .GetAllAsync()
+                .FirstOrDefaultAsync(s => s.Email == email);
+            if ( supervisor == null )
+                return new UnauthorizedObjectResult(new ApiResponse(401, "Supervisor not found."));
+
+            // Validate project idea
+            var projectIdea = await _unitOfWork.GetRepository<ProjectIdea>()
+                .GetAllAsync()
+                .Include(p => p.Team)
+                .FirstOrDefaultAsync(p => p.Id == projectIdeaId);
+
+            if ( projectIdea == null )
+                return new NotFoundObjectResult(new ApiResponse(404, "Project idea not found."));
+
+            // Validate if the supervisor is assigned to the project's team
+            var team = await _unitOfWork.GetRepository<Team>()
+                .GetAllAsync()
+                .FirstOrDefaultAsync(t => t.Id == projectIdea.TeamId && t.SupervisorId == supervisor.Id);
+            if ( team == null )
+                return new UnauthorizedObjectResult(new ApiResponse(403, "You are not the supervisor of this project."));
+
+            // Check if all tasks are completed
+            var tasks = await _unitOfWork.GetRepository<Task>()
+                .GetAllAsync()
+                .Where(t => t.TeamId == projectIdea.TeamId)
+                .ToListAsync();
+
+            if ( tasks.Any(t => t.Status != TaskStatusEnum.Completed) )
+                return new BadRequestObjectResult(new ApiResponse(400, "All tasks must be in Completed status to mark the project as completed."));
+
+            // Mark project as completed
+            if ( projectIdea.IsCompleted )
+                return new BadRequestObjectResult(new ApiResponse(400, "Project is already marked as completed."));
+
+            projectIdea.IsCompleted = true;
+            projectIdea.CompletedAt = DateTime.UtcNow;
+
+            await _unitOfWork.SaveChangesAsync();
+
+            // Prepare response
+            var response = new
+            {
+                ProjectIdeaId = projectIdea.Id,
+                TeamId = team.Id,
+                Title = projectIdea.Title,
+                TeamName = team.Name,
+                SupervisorName = $"{supervisor.FirstName} {supervisor.LastName}",
+                CompletedAt = projectIdea.CompletedAt,
+                Message = "Project marked as completed successfully"
+            };
+
+            return new OkObjectResult(response);
+        }
+        #endregion MarkProjectAsCompleted Service
+
+        #region GetCompletedProjectsBySupervisor Service
+        public async Task<ActionResult> GetCompletedProjectsBySupervisorAsync( int supervisorId, ClaimsPrincipal user )
+        {
+            // Validate email from token
+            var email = user.FindFirstValue(ClaimTypes.Email);
+            if ( string.IsNullOrEmpty(email) )
+                return new UnauthorizedObjectResult(new ApiResponse(401, "User email not found in claims."));
+
+            // Check if user is the supervisor
+            var supervisor = await _unitOfWork.GetRepository<Supervisor>()
+                .GetAllAsync()
+                .FirstOrDefaultAsync(s => s.Email == email);
+            if ( supervisor == null || supervisor.Id != supervisorId )
+                return new UnauthorizedObjectResult(new ApiResponse(403, "You are not authorized to view these projects."));
+
+            // Get completed projects
+            var projects = await _unitOfWork.GetRepository<ProjectIdea>()
+                .GetAllAsync()
+                .Include(p => p.Team)
+                .Where(p => p.IsCompleted && p.Team.SupervisorId == supervisorId)
+                .ToListAsync();
+
+            if ( projects == null || !projects.Any() )
+                return new NotFoundObjectResult(new ApiResponse(404, $"No completed projects found for supervisor ID {supervisorId}."));
+
+            var response = projects.Select(p => new
+            {
+                ProjectIdeaId = p.Id,
+                Title = p.Title,
+                Description = p.Description,
+                TechStack = p.TechStack,
+                TeamName = p.Team?.Name,
+                CompletedAt = p.CompletedAt,
+                Message = "Completed project retrieved successfully"
+            }).ToList();
+
+            return new OkObjectResult(response);
+        }
+        #endregion GetCompletedProjectsBySupervisor Service
 
 
 
