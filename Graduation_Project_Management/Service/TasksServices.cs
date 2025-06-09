@@ -357,8 +357,8 @@ namespace Graduation_Project_Management.Service
                 .Where(t => t.TeamId == teamId)
                 .ToListAsync();
 
-            if ( tasks == null || !tasks.Any() )
-                return new NotFoundObjectResult(new ApiResponse(404, $"No tasks found for team ID {teamId}."));
+            if (tasks == null || !tasks.Any())
+                return new OkObjectResult(new List<TaskResponseDto>());
 
             var response = tasks.Select(async t =>
             {

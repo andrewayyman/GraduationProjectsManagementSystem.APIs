@@ -18,6 +18,8 @@ namespace Graduation_Project_Management.Extension
             Services.AddScoped(typeof(IRequestService), typeof(RequestService));
             Services.AddScoped(typeof(ISupervisorService), typeof(SupervisorService));
             Services.AddScoped(typeof(ITasksServices), typeof(TasksServices));
+            Services.AddScoped(typeof(IMeetingService), typeof(MeetingsServices));
+
 
             return Services;
         }

@@ -354,11 +354,11 @@ namespace Graduation_Project_Management.Service
                 return new BadRequestObjectResult(new ApiResponse(400, "Project idea already has a supervisor."));
 
             // Check for existing pending request
-            var existingRequest = await _unitOfWork.GetRepository<ProjectIdeaRequest>()
-                .GetAllAsync()
-                .AnyAsync(r => r.ProjectIdeaId == dto.ProjectIdeaId && r.Status == ProjectIdeaStatus.Pending);
-            if ( existingRequest )
-                return new BadRequestObjectResult(new ApiResponse(400, "A pending supervisor request already exists for this project idea."));
+            //var existingRequest = await _unitOfWork.GetRepository<ProjectIdeaRequest>()
+            //    .GetAllAsync()
+            //    .AnyAsync(r => r.ProjectIdeaId == dto.ProjectIdeaId && r.Status == ProjectIdeaStatus.Pending);
+            //if ( existingRequest )
+            //    return new BadRequestObjectResult(new ApiResponse(400, "A pending supervisor request already exists for this project idea."));
 
 
 

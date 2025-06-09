@@ -328,26 +328,53 @@ namespace Graduation_Project_Management.Service
                 string content = "";
                 Notification notification = null;
 
-                if (dto.IsApproved )
+                if (dto.IsApproved)
                 {
+                    // تثبيت الموافقة
                     request.Status = ProjectIdeaStatus.Accepted;
                     request.ProjectIdea.SupervisorId = supervisor.Id;
                     request.ProjectIdea.Status = ProjectIdeaStatus.Accepted;
                     request.ProjectIdea.Team.SupervisorId = supervisor.Id;
 
-                    // Reject other pending requests for the same project idea
-                    var otherRequests = await _unitOfWork.GetRepository<ProjectIdeaRequest>()
+                    var projectIdeaId = request.ProjectIdeaId;
+                    var teamId = request.ProjectIdea.TeamId;
+
+                    // حذف كل الطلبات الأخرى لنفس الفكرة
+                    var otherRequestsSameIdea = await _unitOfWork.GetRepository<ProjectIdeaRequest>()
                         .GetAllAsync()
-                        .Where(r => r.ProjectIdeaId == request.ProjectIdeaId && r.Id != request.Id && r.Status == ProjectIdeaStatus.Pending)
+                        .Where(r => r.ProjectIdeaId == projectIdeaId && r.Id != request.Id)
                         .ToListAsync();
 
-                    foreach ( var otherRequest in otherRequests )
+                    foreach (var req in otherRequestsSameIdea)
                     {
-                        otherRequest.Status = ProjectIdeaStatus.Rejected;
+                        await _unitOfWork.GetRepository<ProjectIdeaRequest>().DeleteAsync(req);
+                    }
+
+                    // حذف كل الطلبات لأفكار تانية مقدمة من نفس الفريق
+                    var otherTeamRequests = await _unitOfWork.GetRepository<ProjectIdeaRequest>()
+                        .GetAllAsync()
+                        .Where(r => r.ProjectIdea.TeamId == teamId && r.ProjectIdeaId != projectIdeaId)
+                        .ToListAsync();
+
+                    foreach (var r in otherTeamRequests)
+                    {
+                        // حذف الطلب
+                        await _unitOfWork.GetRepository<ProjectIdeaRequest>().DeleteAsync(r);
+
+                        // حذف الفكرة نفسها لو بتخص نفس الفريق
+                        var idea = await _unitOfWork.GetRepository<ProjectIdea>()
+                            .GetByIdAsync(r.ProjectIdeaId);
+
+                        if (idea.TeamId == teamId && idea.Id != projectIdeaId)
+                        {
+                            await _unitOfWork.GetRepository<ProjectIdea>().DeleteAsync(idea);
+                        }
                     }
 
                     title = "Project Idea Request Approved";
                     content = $"Your project idea request for team '{request.ProjectIdea.Team.Name}' has been approved by the supervisor.";
+
+                    await _unitOfWork.SaveChangesAsync();
                 }
                 else
                 {
