@@ -113,8 +113,8 @@ namespace Graduation_Project_Management.Controllers
             var roles = await _userManager.GetRolesAsync(user);
             var role = roles.FirstOrDefault(); // Assume single role for simplicity
 
-            if (!user.EmailConfirmed && role=="admin")
-                return Unauthorized("Please confirm your email before logging in.");
+            //if (!user.EmailConfirmed && role!="Admin")
+            //    return Unauthorized("Please confirm your email before logging in.");
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
             if ( !result.Succeeded ) return Unauthorized("Invalid email or password.");
