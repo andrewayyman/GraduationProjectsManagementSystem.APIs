@@ -83,7 +83,6 @@ namespace Graduation_Project_Management.Controllers
 
         #region GetTeamByStudentID
         [HttpGet("student/{studentId}")]
-        [Authorize(Roles = "Student")]
         public async Task<IActionResult> GetTeamByStudentId( int studentId )
         {
             return await _teamService.GetTeamByStudentIdAsync(studentId, User);

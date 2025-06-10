@@ -143,7 +143,7 @@ namespace Graduation_Project_Management.Service
         #endregion
 
         #region Get Team By Id
-        public async Task<IActionResult> GetTeamByIdAsync( int id, ClaimsPrincipal user )
+        public async Task<IActionResult> GetTeamByIdAsync(int id, ClaimsPrincipal user)
         {
             var team = await _unitOfWork.GetRepository<Team>().GetAllAsync()
                       .Include(t => t.TeamMembers)
@@ -151,13 +151,18 @@ namespace Graduation_Project_Management.Service
                             .ThenInclude(p => p.Supervisor)
                       .FirstOrDefaultAsync(t => t.Id == id);
 
-            if ( team == null )
+            if (team == null)
                 return new NotFoundObjectResult(new ApiResponse(404, "Team not found"));
 
             var userEmail = user.FindFirstValue(ClaimTypes.Email);
-            var roles = user.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
-            if ( !team.TeamMembers.Any(m => m.Email == userEmail) && !roles.Contains("Admin") )
-                return new ObjectResult(new ApiResponse(403, "You are not authorized to view this team.")) { StatusCode = StatusCodes.Status403Forbidden };
+           
+
+            var isTeamMember = team.TeamMembers.Any(m => m.Email == userEmail);
+            var isSupervisorOfTeam = team.ProjectIdeas.Any(p => p.Supervisor != null && p.Supervisor.Email == userEmail);
+
+            if (!isTeamMember && !isSupervisorOfTeam)
+                return new ObjectResult(new ApiResponse(403, "You are not authorized to view this team."))
+                { StatusCode = StatusCodes.Status403Forbidden };
 
             var result = new GetTeamsDto
             {
@@ -181,8 +186,6 @@ namespace Graduation_Project_Management.Service
                         SupervisorId = p.Supervisor.Id,
                         Name = p.Supervisor.FirstName + " " + p.Supervisor.LastName,
                     } : null
-
-
                 }).ToList()
             };
 
@@ -190,10 +193,13 @@ namespace Graduation_Project_Management.Service
         }
         #endregion
 
+
         #region Get Team By StudentId
-        public async Task<IActionResult> GetTeamByStudentIdAsync( int studentId, ClaimsPrincipal user )
+        public async Task<IActionResult> GetTeamByStudentIdAsync(int studentId, ClaimsPrincipal user)
         {
             var userEmail = user.FindFirstValue(ClaimTypes.Email);
+
+
             var student = await _unitOfWork.GetRepository<Student>().GetAllAsync()
                  .Where(s => s.Id == studentId)
                 .Include(s => s.Team)
@@ -203,19 +209,20 @@ namespace Graduation_Project_Management.Service
                         .ThenInclude(p => p.Supervisor)
                 .FirstOrDefaultAsync();
 
-            if ( student == null )
+            if (student == null)
                 return new NotFoundObjectResult(new ApiResponse(404, "Student not found"));
 
-            if ( student.Email != userEmail )
-                return new ObjectResult(new ApiResponse(403, "You are not authorized to view this team."));
-           
-            if ( student.Team == null )
-                return new ObjectResult ( new ApiResponse(200 , "This Student Not Belong to any Team Yet")) ;
-
-            if ( studentId != student.Id )
-                return new BadRequestObjectResult(new ApiResponse(400 , "Student ID does not match the logged-in user."));
-
             var team = student.Team;
+
+            if (team == null)
+                return new ObjectResult(new ApiResponse(200, "This student does not belong to any team yet"));
+
+            var isStudentSelf = student.Email == userEmail;
+            var isSupervisor = team.ProjectIdeas.Any(p => p.Supervisor != null && p.Supervisor.Email == userEmail);
+
+            if (!isStudentSelf && !isSupervisor)
+                return new ObjectResult(new ApiResponse(403, "You are not authorized to view this team."));
+
             var result = new GetTeamByStdIdDto
             {
                 StudentName = student.FirstName + " " + student.LastName,
@@ -239,14 +246,13 @@ namespace Graduation_Project_Management.Service
                         SupervisorId = p.Supervisor.Id,
                         Name = p.Supervisor.FirstName + " " + p.Supervisor.LastName,
                     } : null
-
-
                 }).ToList()
             };
 
             return new OkObjectResult(result);
         }
         #endregion
+
 
         #region Update Team Profile
         public async Task<IActionResult> UpdateTeamProfileAsync( ClaimsPrincipal user, UpdateTeamDto dto )

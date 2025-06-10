@@ -74,7 +74,7 @@ namespace Graduation_Project_Management.Service
             var userEmail = user.FindFirstValue(ClaimTypes.Email);
             var roles = user.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
 
-            if ( student.Email != userEmail && !roles.Contains("Admin") )
+            if ( student.Email != userEmail)
                 return new UnauthorizedObjectResult(new ApiResponse(403, "You are not authorized to view this profile"));
 
 
