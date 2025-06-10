@@ -1,4 +1,5 @@
 ﻿using Graduation_Project_Management.DTOs.ProjectIdeasDTOs;
+using Graduation_Project_Management.DTOs.TeamsDTOs;
 
 namespace Graduation_Project_Management.DTOs.TeamsDtos
 {
@@ -10,7 +11,7 @@ namespace Graduation_Project_Management.DTOs.TeamsDtos
         public string TeamDepartment { get; set; }
         public int MembersCount { get; set; }
         public List<string>? TechStack { get; set; }
-        public List<string>? TeamMembers { get; set; } 
+        public List<TeamMemberDto>? TeamMembers { get; set; } 
         public List<ProjectIdeaDto>? ProjectIdeas { get; set; } 
     }
 }
