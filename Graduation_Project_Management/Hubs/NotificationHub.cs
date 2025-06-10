@@ -14,6 +14,7 @@ namespace Graduation_Project_Management.Hubs
             {
                 throw new ArgumentException("User ID cannot be null or empty.");
             }
+
             _userConnections[userId] = Context.ConnectionId;
             return Task.CompletedTask;
         }
