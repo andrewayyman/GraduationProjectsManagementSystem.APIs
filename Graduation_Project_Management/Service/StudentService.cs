@@ -150,52 +150,94 @@ namespace Graduation_Project_Management.Service
 
         #region DeleteStudent
 
-        public async Task<IActionResult> DeleteStudentProfileAsync( int studentId, ClaimsPrincipal user )
+        public async Task<IActionResult> DeleteStudentProfileAsync(int studentId, ClaimsPrincipal user)
         {
             var userEmail = user.FindFirstValue(ClaimTypes.Email);
             var roles = user.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
 
             var studentRepo = _unitOfWork.GetRepository<Student>();
+            var teamRepo = _unitOfWork.GetRepository<Team>();
+            var ideaRepo = _unitOfWork.GetRepository<ProjectIdea>();
+
             var student = await studentRepo.GetAllAsync()
                 .Where(s => s.Id == studentId)
                 .Include(s => s.Team)
+                    .ThenInclude(t => t.TeamMembers)
+                .Include(s => s.Team)
+                    .ThenInclude(t => t.ProjectIdeas)
                 .Include(s => s.JoinRequests)
                 .FirstOrDefaultAsync();
 
+            if (student == null)
+                return new NotFoundObjectResult(new ApiResponse(404, "Student Not Found"));
 
-            if ( student == null )
-                return new NotFoundObjectResult(new ApiResponse(404 , "Student Not FOund"));
-
-            // Allow only the Student themselves or Admin
-            if ( student.Email != userEmail && !roles.Contains("Admin") )
-                return new ObjectResult( new ApiResponse(403 , "Unauthorized to delete this student.") ) ;
+            // Allow only the student themselves or an Admin
+            if (student.Email != userEmail && !roles.Contains("Admin"))
+                return new ObjectResult(new ApiResponse(403, "Unauthorized to delete this student."));
 
             var appUser = await _userManager.FindByEmailAsync(student.Email);
-            if ( appUser == null )
-                return new NotFoundObjectResult ( new ApiResponse(404 , "User not found") );
+            if (appUser == null)
+                return new NotFoundObjectResult(new ApiResponse(404, "User not found"));
 
-            if ( student.Team != null )
+            // If the student is part of a team
+            if (student.Team != null)
             {
-                student.Team.TeamMembers.Remove(student);
+                var team = student.Team;
+
+                // If the student is the last member, delete the team and its ideas
+                if (team.TeamMembers.Count == 1)
+                {
+                    // Delete all project ideas
+                    if (team.ProjectIdeas != null && team.ProjectIdeas.Any())
+                    {
+                        foreach (var idea in team.ProjectIdeas)
+                        {
+                            await ideaRepo.DeleteAsync(idea);
+                        }
+                    }
+
+                    // Delete the team
+                    await teamRepo.DeleteAsync(team);
+                }
+                else
+                {
+                    // Otherwise, just remove the student from the team
+                    team.TeamMembers.Remove(student);
+                }
             }
 
-            if ( student.JoinRequests != null && student.JoinRequests.Any() )
+            // Delete any join requests sent by the student
+            if (student.JoinRequests != null && student.JoinRequests.Any())
             {
                 var joinRequestRepo = _unitOfWork.GetRepository<TeamJoinRequest>();
-                foreach ( var request in student.JoinRequests )
+                foreach (var request in student.JoinRequests)
                 {
                     await joinRequestRepo.DeleteAsync(request);
                 }
             }
 
+            var taskRepo = _unitOfWork.GetRepository<Domain.Entities.Task>(); 
+
+            var studentTasks = await taskRepo.GetAllAsync()
+                .Where(t => t.AssignedStudentId == student.Id)
+                .ToListAsync();
+
+            foreach (var task in studentTasks)
+            {
+                await taskRepo.DeleteAsync(task);
+            }
+
+
+            // Delete the student and the identity user
             await studentRepo.DeleteAsync(student);
             var result = await _userManager.DeleteAsync(appUser);
-            if ( !result.Succeeded )
-                return new BadRequestObjectResult(new ApiResponse(404 , "Failed to delete user from Identity."));
+            if (!result.Succeeded)
+                return new BadRequestObjectResult(new ApiResponse(400, "Failed to delete user from Identity."));
 
             await _unitOfWork.SaveChangesAsync();
-            return new OkObjectResult(new ApiResponse(200 , "Student and user deleted successfully"));
+            return new OkObjectResult(new ApiResponse(200, "Student, user, and possibly team deleted successfully."));
         }
+
         #endregion Delete
 
 
