@@ -47,7 +47,11 @@ namespace Graduation_Project_Management.Service
                 MembersCount = t.TeamMembers.Count,
 
                 TeamMembers = t.TeamMembers
-                    .Select(m => $"{m.FirstName} {m.LastName} - {m.MainRole}")
+                    .Select(m => new TeamMemberDto
+                    {
+                        Id = m.Id,
+                        FullName = m.FirstName + " " + m.LastName,
+                    })
                     .ToList(),
 
                 ProjectIdeas = t.ProjectIdeas.Select(p => new ProjectIdeaDto
@@ -177,9 +181,12 @@ namespace Graduation_Project_Management.Service
                 TechStack = team.TechStack,
                 MembersCount = team.TeamMembers.Count,
                 TeamMembers = team.TeamMembers
-                    .Select(m => $"{m.FirstName} {m.LastName} - {m.MainRole}")
+                    .Select(m => new TeamMemberDto
+                    {
+                        Id = m.Id,
+                        FullName = m.FirstName + " " + m.LastName,
+                    })
                     .ToList(),
-
                 ProjectIdeas = team.ProjectIdeas.Select(p => new ProjectIdeaDto
                 {
                     ProjectIdeaId = p.Id,
@@ -240,8 +247,14 @@ namespace Graduation_Project_Management.Service
                 TechStack = team.TechStack,
                 MembersCount = team.TeamMembers.Count,
                 TeamMembers = team.TeamMembers
-                    .Select(m => $"{m.FirstName} {m.LastName} - {m.MainRole}")
+                    .Select(m => new TeamDtoWithRole
+                    {
+                        Id = m.Id,
+                        FullName = $"{m.FirstName} {m.LastName}",
+                        MainRole = m.MainRole
+                    })
                     .ToList(),
+
 
                 ProjectIdeas = team.ProjectIdeas.Select(p => new ProjectIdeaDto
                 {
