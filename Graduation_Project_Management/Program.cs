@@ -27,7 +27,7 @@ namespace Graduation_Project_Management
                 Options.UseSqlServer(builder.Configuration.GetConnectionString("IdentitySQLConnection"));
             });
 
-            builder.Services.ApplicationServices();
+            builder.Services.ApplicationServices(builder.Configuration);
             builder.Services.AddIdentityService(builder.Configuration);
             builder.Services.AddSignalR();
             builder.Services.AddCors(options =>

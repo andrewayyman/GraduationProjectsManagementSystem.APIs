@@ -1,4 +1,5 @@
-﻿using Domain.Repository;
+﻿using Domain.Entities;
+using Domain.Repository;
 using Graduation_Project_Management.IServices;
 using Graduation_Project_Management.Service;
 using Graduation_Project_Management.Utilities;
@@ -8,7 +9,7 @@ namespace Graduation_Project_Management.Extension
 {
     public static class AppServicesExtension
     {
-        public static IServiceCollection ApplicationServices( this IServiceCollection Services )
+        public static IServiceCollection ApplicationServices( this IServiceCollection Services, IConfiguration _configuration)
         {
             Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
@@ -19,6 +20,8 @@ namespace Graduation_Project_Management.Extension
             Services.AddScoped(typeof(ISupervisorService), typeof(SupervisorService));
             Services.AddScoped(typeof(ITasksServices), typeof(TasksServices));
             Services.AddScoped(typeof(IMeetingService), typeof(MeetingsServices));
+            Services.Configure<EmailSettings>(_configuration.GetSection("EmailSettings"));
+            Services.AddTransient<IEmailSenderService, EmailSender>();
 
 
             return Services;
