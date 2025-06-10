@@ -21,7 +21,7 @@ namespace Graduation_Project_Management.Service
         #region Dependencies
         private readonly IUnitOfWork _unitOfWork;
 
-        public TeamService( IUnitOfWork unitOfWork )
+        public TeamService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
@@ -69,7 +69,7 @@ namespace Graduation_Project_Management.Service
         #endregion
 
         #region Create
-        public async Task<IActionResult> CreateTeamAsync( ClaimsPrincipal user, TeamDto dto )
+        public async Task<IActionResult> CreateTeamAsync(ClaimsPrincipal user, TeamDto dto)
         {
             var userEmail = user.FindFirstValue(ClaimTypes.Email);
             var CreatorStudent = await _unitOfWork.GetRepository<Student>().GetAllAsync()
@@ -78,15 +78,15 @@ namespace Graduation_Project_Management.Service
                 .FirstOrDefaultAsync();
 
             // Validate TeamCreator
-            if ( CreatorStudent == null )
+            if (CreatorStudent == null)
                 return new NotFoundObjectResult(new ApiResponse(404, "Student profile not found."));
 
-            if ( CreatorStudent.Team != null )
+            if (CreatorStudent.Team != null)
                 return new BadRequestObjectResult(new ApiResponse(400, "You are already part of another team."));
 
             // Validate Added TeamMembers
             var TeamMembers = new List<Student>() { CreatorStudent };
-            if ( dto.MembersEmails != null && dto.MembersEmails.Any() )
+            if (dto.MembersEmails != null && dto.MembersEmails.Any())
             {
 
                 // to avoid duplicates and the creator's email
@@ -96,7 +96,7 @@ namespace Graduation_Project_Management.Service
                     .ToList();
 
                 // check team max size
-                if ( UniqueEmails.Count + TeamMembers.Count > 6 )
+                if (UniqueEmails.Count + TeamMembers.Count > 6)
                     return new BadRequestObjectResult(new ApiResponse(400, "Team members exceed the maximum limit of 6."));
 
                 // Fetch all students with the provided emails
@@ -106,13 +106,13 @@ namespace Graduation_Project_Management.Service
                     .ToListAsync();
 
                 // Check if all requested students exist
-                if ( students.Count != UniqueEmails.Count )
+                if (students.Count != UniqueEmails.Count)
                     return new BadRequestObjectResult(new ApiResponse(400, "One or more students not found."));
 
                 // Check if any student is already in a team
-                foreach ( var student in students )
+                foreach (var student in students)
                 {
-                    if ( student.Team != null )
+                    if (student.Team != null)
                         return new BadRequestObjectResult(new ApiResponse(400, $"Student {student.FirstName} {student.LastName} is already in a team."));
                     TeamMembers.Add(student);
                 }
@@ -155,7 +155,7 @@ namespace Graduation_Project_Management.Service
                 return new NotFoundObjectResult(new ApiResponse(404, "Team not found"));
 
             var userEmail = user.FindFirstValue(ClaimTypes.Email);
-           
+
 
             var isTeamMember = team.TeamMembers.Any(m => m.Email == userEmail);
             var isSupervisorOfTeam = team.ProjectIdeas.Any(p => p.Supervisor != null && p.Supervisor.Email == userEmail);
@@ -172,7 +172,9 @@ namespace Graduation_Project_Management.Service
                 TeamDepartment = team.TeamDepartment,
                 TechStack = team.TechStack,
                 MembersCount = team.TeamMembers.Count,
-                TeamMembers = team.TeamMembers.Select(m => m.FirstName + " " + m.LastName).ToList(),
+                TeamMembers = team.TeamMembers
+                    .Select(m => $"{m.FirstName} {m.LastName} - {m.MainRole}")
+                    .ToList(),
                 ProjectIdeas = team.ProjectIdeas.Select(p => new ProjectIdeaDto
                 {
                     ProjectIdeaId = p.Id,
@@ -232,7 +234,9 @@ namespace Graduation_Project_Management.Service
                 TeamDepartment = team.TeamDepartment,
                 TechStack = team.TechStack,
                 MembersCount = team.TeamMembers.Count,
-                TeamMembers = team.TeamMembers.Select(m => m.FirstName + " " + m.LastName).ToList(),
+                TeamMembers = team.TeamMembers
+                    .Select(m => $"{m.FirstName} {m.LastName} - {m.MainRole}")
+                    .ToList(),
                 ProjectIdeas = team.ProjectIdeas.Select(p => new ProjectIdeaDto
                 {
                     ProjectIdeaId = p.Id,
@@ -255,7 +259,7 @@ namespace Graduation_Project_Management.Service
 
 
         #region Update Team Profile
-        public async Task<IActionResult> UpdateTeamProfileAsync( ClaimsPrincipal user, UpdateTeamDto dto )
+        public async Task<IActionResult> UpdateTeamProfileAsync(ClaimsPrincipal user, UpdateTeamDto dto)
         {
             var userEmail = user.FindFirstValue(ClaimTypes.Email);
 
@@ -264,12 +268,12 @@ namespace Graduation_Project_Management.Service
                     .Include(s => s.Team)
                     .FirstOrDefaultAsync();
 
-            if ( student == null )
+            if (student == null)
                 return new NotFoundObjectResult(new ApiResponse(404, "Student not found"));
 
-            if ( student.Team == null )
+            if (student.Team == null)
                 return new BadRequestObjectResult(new ApiResponse(400, "You are not a member of any team"));
-            
+
             var team = student.Team;
 
             team.Name = dto.Name ?? team.Name;
@@ -284,7 +288,7 @@ namespace Graduation_Project_Management.Service
         #endregion
 
         #region Delete 
-        public async Task<IActionResult> DeleteTeamAsync( ClaimsPrincipal user, int teamId )
+        public async Task<IActionResult> DeleteTeamAsync(ClaimsPrincipal user, int teamId)
         {
             var userEmail = user.FindFirstValue(ClaimTypes.Email);
             var team = await _unitOfWork.GetRepository<Team>().GetAllAsync()
@@ -292,10 +296,10 @@ namespace Graduation_Project_Management.Service
                 .Include(t => t.TeamMembers)
                 .FirstOrDefaultAsync();
 
-            if ( team == null )
+            if (team == null)
                 return new NotFoundObjectResult(new ApiResponse(404, "Team not found"));
 
-            if ( !team.TeamMembers.Any(m => m.Email == userEmail) )
+            if (!team.TeamMembers.Any(m => m.Email == userEmail))
                 return new ObjectResult(new ApiResponse(403, "You are not part of this team"));
 
             await _unitOfWork.GetRepository<Team>().DeleteAsync(team);
