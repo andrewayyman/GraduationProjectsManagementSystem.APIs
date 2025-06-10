@@ -110,14 +110,16 @@ namespace Graduation_Project_Management.Controllers
             var user = await _userManager.FindByEmailAsync(model.Email);
             if ( user == null ) return Unauthorized("Invalid email or password.");
 
-            if (!user.EmailConfirmed)
+            var roles = await _userManager.GetRolesAsync(user);
+            var role = roles.FirstOrDefault(); // Assume single role for simplicity
+
+            if (!user.EmailConfirmed && role=="admin")
                 return Unauthorized("Please confirm your email before logging in.");
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
             if ( !result.Succeeded ) return Unauthorized("Invalid email or password.");
 
-            var roles = await _userManager.GetRolesAsync(user);
-            var role = roles.FirstOrDefault(); // Assume single role for simplicity
+           
             if ( role == null ) return BadRequest("User has no role assigned.");
 
             UserDto returnedUser;

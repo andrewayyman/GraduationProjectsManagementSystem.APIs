@@ -216,6 +216,18 @@ namespace Graduation_Project_Management.Service
                 }
             }
 
+            var taskRepo = _unitOfWork.GetRepository<Domain.Entities.Task>(); 
+
+            var studentTasks = await taskRepo.GetAllAsync()
+                .Where(t => t.AssignedStudentId == student.Id)
+                .ToListAsync();
+
+            foreach (var task in studentTasks)
+            {
+                await taskRepo.DeleteAsync(task);
+            }
+
+
             // Delete the student and the identity user
             await studentRepo.DeleteAsync(student);
             var result = await _userManager.DeleteAsync(appUser);
