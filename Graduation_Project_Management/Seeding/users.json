@@ -1,0 +1,137 @@
+[
+  {
+    "id": 1000,
+    "firstName": "Ahmed",
+    "lastName": "Salah",
+    "userName": "ahmed.salah",
+    "email": "ahmed.salah@fci.helwan.edu.eg",
+    "passwordHash": "AQAAAAEAACcQAAAAEJIiT5...[hashed_password]...",
+    "role": "Supervisor"
+  },
+  {
+    "id": 1001,
+    "firstName": "Mohamed",
+    "lastName": "Kamal",
+    "userName": "mohamed.kamal",
+    "email": "mohamed.kamal@fci.helwan.edu.eg",
+    "passwordHash": "AQAAAAEAACcQAAAAEJIiT5...[hashed_password]...",
+    "role": "Supervisor"
+  },
+  {
+    "id": 1002,
+    "firstName": "Sara",
+    "lastName": "Mohsen",
+    "userName": "sara.mohsen",
+    "email": "sara.mohsen@fci.helwan.edu.eg",
+    "passwordHash": "AQAAAAEAACcQAAAAEJIiT5...[hashed_password]...",
+    "role": "Student"
+  },
+  {
+    "id": 1003,
+    "firstName": "Ali",
+    "lastName": "Hassan",
+    "userName": "ali.hassan",
+    "email": "ali.hassan@fci.helwan.edu.eg",
+    "passwordHash": "AQAAAAEAACcQAAAAEJIiT5...[hashed_password]...",
+    "role": "Student"
+  },
+  {
+    "id": 1004,
+    "firstName": "hamada",
+    "lastName": "mohsen",
+    "userName": "hamada.mohsen",
+    "email": "hamadamohsen@Helwan.com",
+    "passwordHash": "AQAAAAEAACcQAAAAEJIiT5...[hashed_password]...",
+    "role": "Admin"
+  },
+  {
+    "id": 1005,
+    "firstName": "Nader",
+    "lastName": "Ali",
+    "userName": "nader.ali",
+    "email": "nader.ali@fci.helwan.edu.eg",
+    "passwordHash": "AQAAAAEAACcQAAAAEJIiT5...[hashed_password]...",
+    "role": "Student"
+  },
+  {
+    "id": 1006,
+    "firstName": "Maryam",
+    "lastName": "Fouad",
+    "userName": "maryam.fouad",
+    "email": "maryam.fouad@fci.helwan.edu.eg",
+    "passwordHash": "AQAAAAEAACcQAAAAEJIiT5...[hashed_password]...",
+    "role": "Student"
+  },
+  {
+    "id": 1007,
+    "firstName": "Khaled",
+    "lastName": "Ismail",
+    "userName": "khaled.ismail",
+    "email": "khaled.ismail@fci.helwan.edu.eg",
+    "passwordHash": "AQAAAAEAACcQAAAAEJIiT5...[hashed_password]...",
+    "role": "Supervisor"
+  },
+  {
+    "id": 1008,
+    "firstName": "Hassan",
+    "lastName": "Adel",
+    "userName": "hassan.adel",
+    "email": "hassan.adel@fci.helwan.edu.eg",
+    "passwordHash": "AQAAAAEAACcQAAAAEJIiT5...[hashed_password]...",
+    "role": "Supervisor"
+  },
+  {
+    "id": 1009,
+    "firstName": "Youssef",
+    "lastName": "Ragab",
+    "userName": "youssef.ragab",
+    "email": "youssef.ragab@fci.helwan.edu.eg",
+    "passwordHash": "AQAAAAEAACcQAAAAEJIiT5...[hashed_password]...",
+    "role": "Supervisor"
+  },
+  {
+    "id": 1010,
+    "firstName": "Fatma",
+    "lastName": "Moharram",
+    "userName": "fatma.moharram",
+    "email": "fatma.moharram@fci.helwan.edu.eg",
+    "passwordHash": "AQAAAAEAACcQAAAAEJIiT5...[hashed_password]...",
+    "role": "Supervisor"
+  },
+  {
+    "id": 1011,
+    "firstName": "Esraa",
+    "lastName": "Said",
+    "userName": "esraa.said",
+    "email": "esraa.said@fci.helwan.edu.eg",
+    "passwordHash": "AQAAAAEAACcQAAAAEJIiT5...[hashed_password]...",
+    "role": "Student"
+  },
+  {
+    "id": 1012,
+    "firstName": "Osama",
+    "lastName": "Ezz",
+    "userName": "osama.ezz",
+    "email": "osama.ezz@fci.helwan.edu.eg",
+    "passwordHash": "AQAAAAEAACcQAAAAEJIiT5...[hashed_password]...",
+    "role": "Student"
+  },
+  {
+    "id": 1013,
+    "firstName": "Amr",
+    "lastName": "Shawky",
+    "userName": "amr.shawky",
+    "email": "amr.shawky@fci.helwan.edu.eg",
+    "passwordHash": "AQAAAAEAACcQAAAAEJIiT5...[hashed_password]...",
+    "role": "Supervisor"
+  },
+  {
+    "id": 1014,
+    "firstName": "Doaa",
+    "lastName": "Elz",
+    "userName": "doaa.elz",
+    "email": "doaa.elz@fci.helwan.edu.eg",
+    "passwordHash": "AQAAAAEAACcQAAAAEJIiT5...[hashed_password]...",
+    "role": "Supervisor"
+  }
+]

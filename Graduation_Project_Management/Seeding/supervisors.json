@@ -1,0 +1,152 @@
+[
+  {
+    "firstName": "Ahmed",
+    "lastName": "Salah",
+    "email": "ahmed.salah@fci.helwan.edu.eg",
+    "phoneNumber": "01012345678",
+    "department": "cs",
+    "profilePictureUrl": "/Uploads/supervisor1.png",
+    "maxAssignedTeams": 4,
+    "preferredTechnologies": [ "Python", "SQL", "Machine Learning" ]
+  },
+  {
+    "firstName": "Mohamed",
+    "lastName": "Kamal",
+    "email": "mohamed.kamal@fci.helwan.edu.eg",
+    "phoneNumber": "01023456789",
+    "department": "is",
+    "profilePictureUrl": "/Uploads/supervisor2.png",
+    "maxAssignedTeams": 4,
+    "preferredTechnologies": [ "ASP.NET", "React", "SQL" ]
+  },
+  {
+    "firstName": "Khaled",
+    "lastName": "Ismail",
+    "email": "khaled.ismail@fci.helwan.edu.eg",
+    "phoneNumber": "01034567890",
+    "department": "it",
+    "profilePictureUrl": "/Uploads/supervisor3.png",
+    "maxAssignedTeams": 4,
+    "preferredTechnologies": [ "Java", "Spring", "Docker" ]
+  },
+  {
+    "firstName": "Hassan",
+    "lastName": "Adel",
+    "email": "hassan.adel@fci.helwan.edu.eg",
+    "phoneNumber": "01045678901",
+    "department": "ai",
+    "profilePictureUrl": "/Uploads/supervisor4.png",
+    "maxAssignedTeams": 4,
+    "preferredTechnologies": [ "Node.js", "MongoDB", "AWS" ]
+  },
+  {
+    "firstName": "Youssef",
+    "lastName": "Ragab",
+    "email": "youssef.ragab@fci.helwan.edu.eg",
+    "phoneNumber": "01056789012",
+    "department": "cs",
+    "profilePictureUrl": "/Uploads/supervisor5.png",
+    "maxAssignedTeams": 4,
+    "preferredTechnologies": [ "Python", "TensorFlow", "Big Data" ]
+  },
+  {
+    "firstName": "Fatma",
+    "lastName": "Moharram",
+    "email": "fatma.moharram@fci.helwan.edu.eg",
+    "phoneNumber": "01067890123",
+    "department": "is",
+    "profilePictureUrl": "/Uploads/supervisor6.png",
+    "maxAssignedTeams": 4,
+    "preferredTechnologies": [ "PyTorch", "NLP", "Cloud Computing" ]
+  },
+  {
+    "firstName": "Amr",
+    "lastName": "Shawky",
+    "email": "amr.shawky@fci.helwan.edu.eg",
+    "phoneNumber": "01078901234",
+    "department": "it",
+    "profilePictureUrl": "/Uploads/supervisor7.png",
+    "maxAssignedTeams": 4,
+    "preferredTechnologies": [ "Ethical Hacking", "Firewall", "Linux" ]
+  },
+  {
+    "firstName": "Doaa",
+    "lastName": "Elz",
+    "email": "doaa.elz@fci.helwan.edu.eg",
+    "phoneNumber": "01089012345",
+    "department": "ai",
+    "profilePictureUrl": "/Uploads/supervisor8.png",
+    "maxAssignedTeams": 4,
+    "preferredTechnologies": [ "Cisco", "Routing", "Network Security" ]
+  },
+  {
+    "firstName": "Omar",
+    "lastName": "Fathy",
+    "email": "omar.fathy@fci.helwan.edu.eg",
+    "phoneNumber": "01090123456",
+    "department": "cs",
+    "profilePictureUrl": "/Uploads/supervisor9.png",
+    "maxAssignedTeams": 4,
+    "preferredTechnologies": [ "Flutter", "Android", "iOS" ]
+  },
+  {
+    "firstName": "Laila",
+    "lastName": "Hassan",
+    "email": "laila.hassan@fci.helwan.edu.eg",
+    "phoneNumber": "01001234567",
+    "department": "is",
+    "profilePictureUrl": "/Uploads/supervisor10.png",
+    "maxAssignedTeams": 4,
+    "preferredTechnologies": [ "HTML", "CSS", "JavaScript" ]
+  },
+  {
+    "firstName": "Nader",
+    "lastName": "Ali",
+    "email": "nader.ali@fci.helwan.edu.eg",
+    "phoneNumber": "01012345678",
+    "department": "it",
+    "profilePictureUrl": "/Uploads/supervisor11.png",
+    "maxAssignedTeams": 4,
+    "preferredTechnologies": [ "Go", "Gin", "Microservices" ]
+  },
+  {
+    "firstName": "Hana",
+    "lastName": "Khaled",
+    "email": "hana.khaled@fci.helwan.edu.eg",
+    "phoneNumber": "01023456789",
+    "department": "ai",
+    "profilePictureUrl": "/Uploads/supervisor12.png",
+    "maxAssignedTeams": 4,
+    "preferredTechnologies": [ "Rust", "Actix", "Performance Tuning" ]
+  },
+  {
+    "firstName": "Tarek",
+    "lastName": "Mahmoud",
+    "email": "tarek.mahmoud@fci.helwan.edu.eg",
+    "phoneNumber": "01034567890",
+    "department": "cs",
+    "profilePictureUrl": "/Uploads/supervisor13.png",
+    "maxAssignedTeams": 4,
+    "preferredTechnologies": [ "Kotlin", "Android", "Mobile Security" ]
+  },
+  {
+    "firstName": "Lina",
+    "lastName": "Ahmed",
+    "email": "lina.ahmed@fci.helwan.edu.eg",
+    "phoneNumber": "01045678901",
+    "department": "is",
+    "profilePictureUrl": "/Uploads/supervisor14.png",
+    "maxAssignedTeams": 4,
+    "preferredTechnologies": [ "TypeScript", "Angular", "Frontend Optimization" ]
+  },
+  {
+    "firstName": "Youssef",
+    "lastName": "Ibrahim",
+    "email": "youssef.ibrahim@fci.helwan.edu.eg",
+    "phoneNumber": "01056789012",
+    "department": "it",
+    "profilePictureUrl": "/Uploads/supervisor15.png",
+    "maxAssignedTeams": 4,
+    "preferredTechnologies": [ "Vue.js", "Nuxt.js", "PWA" ]
+  }
+]

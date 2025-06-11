@@ -1,0 +1,279 @@
+[
+  {
+    "Id": 1000,
+    "Title": "Design User Interface",
+    "Description": "Design the user interface for the hospital management system",
+    "Deadline": "2025-06-12T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 1,
+    "SupervisorId": 1000,
+    "TeamId": 1000,
+    "AssignedStudentId": 1000
+  },
+  {
+    "Id": 1001,
+    "Title": "Develop AI Algorithm",
+    "Description": "Develop an AI algorithm for the educational app",
+    "Deadline": "2025-06-13T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 0,
+    "SupervisorId": 1001,
+    "TeamId": 1001,
+    "AssignedStudentId": 1005
+  },
+  {
+    "Id": 1002,
+    "Title": "Setup Database",
+    "Description": "Setup the database for the big data analytics system",
+    "Deadline": "2025-06-14T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 2,
+    "SupervisorId": 1002,
+    "TeamId": 1002,
+    "AssignedStudentId": 1002
+  },
+  {
+    "Id": 1003,
+    "Title": "Implement Payment Gateway",
+    "Description": "Add payment integration for the e-commerce platform",
+    "Deadline": "2025-06-15T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 1,
+    "SupervisorId": 1003,
+    "TeamId": 1003,
+    "AssignedStudentId": 1008
+  },
+  {
+    "Id": 1004,
+    "Title": "Configure IoT Sensors",
+    "Description": "Configure sensors for the smart traffic system",
+    "Deadline": "2025-06-16T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 0,
+    "SupervisorId": 1004,
+    "TeamId": 1004,
+    "AssignedStudentId": 1010
+  },
+  {
+    "Id": 1005,
+    "Title": "Train Chatbot Model",
+    "Description": "Train the AI model for the chatbot",
+    "Deadline": "2025-06-17T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 2,
+    "SupervisorId": 1005,
+    "TeamId": 1005,
+    "AssignedStudentId": 1011
+  },
+  {
+    "Id": 1006,
+    "Title": "Design Course Layout",
+    "Description": "Design the layout for the online learning platform",
+    "Deadline": "2025-06-18T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 1,
+    "SupervisorId": 1000,
+    "TeamId": 1000,
+    "AssignedStudentId": 1012
+  },
+  {
+    "Id": 1007,
+    "Title": "Test Security Features",
+    "Description": "Test the cybersecurity tool features",
+    "Deadline": "2025-06-19T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 0,
+    "SupervisorId": 1001,
+    "TeamId": 1001,
+    "AssignedStudentId": 1013
+  },
+  {
+    "Id": 1008,
+    "Title": "Develop Mobile UI",
+    "Description": "Develop the UI for the mobile banking app",
+    "Deadline": "2025-06-20T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 2,
+    "SupervisorId": 1002,
+    "TeamId": 1002,
+    "AssignedStudentId": 1014
+  },
+  {
+    "Id": 1009,
+    "Title": "Build Template Engine",
+    "Description": "Build the template engine for the web portfolio builder",
+    "Deadline": "2025-06-21T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 1,
+    "SupervisorId": 1003,
+    "TeamId": 1003,
+    "AssignedStudentId": 1015
+  },
+  {
+    "Id": 1010,
+    "Title": "Setup Inventory Schema",
+    "Description": "Setup the database schema for inventory management",
+    "Deadline": "2025-06-22T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 0,
+    "SupervisorId": 1004,
+    "TeamId": 1004,
+    "AssignedStudentId": 1016
+  },
+  {
+    "Id": 1011,
+    "Title": "Integrate Fitness API",
+    "Description": "Integrate fitness tracking API for the app",
+    "Deadline": "2025-06-23T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 2,
+    "SupervisorId": 1005,
+    "TeamId": 1005,
+    "AssignedStudentId": 1017
+  },
+  {
+    "Id": 1012,
+    "Title": "Create Visualization Charts",
+    "Description": "Create charts for the data visualization tool",
+    "Deadline": "2025-06-24T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 1,
+    "SupervisorId": 1000,
+    "TeamId": 1000,
+    "AssignedStudentId": 1018
+  },
+  {
+    "Id": 1013,
+    "Title": "Monitor Network Traffic",
+    "Description": "Monitor traffic for the network monitoring system",
+    "Deadline": "2025-06-25T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 0,
+    "SupervisorId": 1001,
+    "TeamId": 1001,
+    "AssignedStudentId": 1019
+  },
+  {
+    "Id": 1014,
+    "Title": "Develop Game Physics",
+    "Description": "Develop physics engine for the game development engine",
+    "Deadline": "2025-06-26T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 2,
+    "SupervisorId": 1002,
+    "TeamId": 1002,
+    "AssignedStudentId": 1020
+  },
+  {
+    "Id": 1015,
+    "Title": "Test UI Responsiveness",
+    "Description": "Test the responsiveness of the hospital UI",
+    "Deadline": "2025-06-27T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 1,
+    "SupervisorId": 1003,
+    "TeamId": 1003,
+    "AssignedStudentId": 1021
+  },
+  {
+    "Id": 1016,
+    "Title": "Optimize AI Model",
+    "Description": "Optimize the AI model for the educational app",
+    "Deadline": "2025-06-28T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 0,
+    "SupervisorId": 1004,
+    "TeamId": 1004,
+    "AssignedStudentId": 1022
+  },
+  {
+    "Id": 1017,
+    "Title": "Deploy Database",
+    "Description": "Deploy the database for the big data system",
+    "Deadline": "2025-06-29T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 2,
+    "SupervisorId": 1005,
+    "TeamId": 1005,
+    "AssignedStudentId": 1023
+  },
+  {
+    "Id": 1018,
+    "Title": "Add Search Feature",
+    "Description": "Add search functionality to the e-commerce platform",
+    "Deadline": "2025-06-30T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 1,
+    "SupervisorId": 1000,
+    "TeamId": 1000,
+    "AssignedStudentId": 1024
+  },
+  {
+    "Id": 1019,
+    "Title": "Calibrate Sensors",
+    "Description": "Calibrate IoT sensors for the traffic system",
+    "Deadline": "2025-07-01T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 0,
+    "SupervisorId": 1001,
+    "TeamId": 1001,
+    "AssignedStudentId": 1025
+  },
+  {
+    "Id": 1020,
+    "Title": "Enhance Chatbot UI",
+    "Description": "Enhance the UI for the AI chatbot",
+    "Deadline": "2025-07-02T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 2,
+    "SupervisorId": 1002,
+    "TeamId": 1002,
+    "AssignedStudentId": 1026
+  },
+  {
+    "Id": 1021,
+    "Title": "Add Quiz Module",
+    "Description": "Add a quiz module to the online learning platform",
+    "Deadline": "2025-07-03T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 1,
+    "SupervisorId": 1003,
+    "TeamId": 1003,
+    "AssignedStudentId": 1027
+  },
+  {
+    "Id": 1022,
+    "Title": "Scan Vulnerabilities",
+    "Description": "Scan for vulnerabilities in the cybersecurity tool",
+    "Deadline": "2025-07-04T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 0,
+    "SupervisorId": 1004,
+    "TeamId": 1004,
+    "AssignedStudentId": 1028
+  },
+  {
+    "Id": 1023,
+    "Title": "Test Mobile Payments",
+    "Description": "Test payment features in the banking app",
+    "Deadline": "2025-07-05T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 2,
+    "SupervisorId": 1005,
+    "TeamId": 1005,
+    "AssignedStudentId": 1029
+  },
+  {
+    "Id": 1024,
+    "Title": "Add Drag and Drop",
+    "Description": "Add drag and drop functionality to the portfolio builder",
+    "Deadline": "2025-07-06T01:11:00Z",
+    "CreatedAt": "2025-06-11T00:00:00Z",
+    "Status": 1,
+    "SupervisorId": 1000,
+    "TeamId": 1000,
+    "AssignedStudentId": 1006
+  }
+
+
+]

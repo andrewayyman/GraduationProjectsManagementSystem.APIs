@@ -2,10 +2,10 @@
 {
     public static class DocumentSetting
     {
-        public static async Task<string> UploadFileAsync(IFormFile file, string folderName)
+        public static async Task<string> UploadFileAsync( IFormFile file, string folderName )
         {
             string FolderPath = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\Files", folderName);
-            if (!Directory.Exists(FolderPath))
+            if ( !Directory.Exists(FolderPath) )
                 Directory.CreateDirectory(FolderPath);
             string fileName = $"{Guid.NewGuid}-{file.FileName}";
             string FilePath = Path.Combine(FolderPath, fileName);
@@ -13,10 +13,10 @@
             await file.CopyToAsync(stream);
             return fileName;
         }
-        public static void DeleteFile(string folderName, string fileName)
+        public static void DeleteFile( string folderName, string fileName )
         {
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\Files", folderName, fileName);
-            if (File.Exists(filePath))
+            if ( File.Exists(filePath) )
                 File.Delete(filePath);
         }
     }

@@ -1,0 +1,92 @@
+[
+  {
+    "name": "Alpha Team",
+    "teamDepartment": "cs",
+    "techStack": [ "Python", "Django" ],
+    "membersEmails": [ "sara.mohsen@fci.helwan.edu.eg", "ali.hassan@fci.helwan.edu.eg", "nader.ali@fci.helwan.edu.eg", "maryam.fouad@fci.helwan.edu.eg", "esraa.said@fci.helwan.edu.eg" ],
+    "supervisorEmail": "ahmed.salah@fci.helwan.edu.eg",
+    "isOpenToJoin": true,
+    "maxMembers": 6
+  },
+  {
+    "name": "Beta Team",
+    "teamDepartment": "is",
+    "techStack": [ "React", "Node.js" ],
+    "membersEmails": [ "osama.ezz@fci.helwan.edu.eg", "tarek.mahmoud@fci.helwan.edu.eg" ],
+    "supervisorEmail": "mohamed.kamal@fci.helwan.edu.eg",
+    "isOpenToJoin": true,
+    "maxMembers": 6
+  },
+  {
+    "name": "Gamma Team",
+    "teamDepartment": "it",
+    "techStack": [ "Java", "Spring" ],
+    "membersEmails": [ "youssef.ibrahim@fci.helwan.edu.eg", "mona.hassan@fci.helwan.edu.eg", "kamal.omar@fci.helwan.edu.eg" ],
+    "supervisorEmail": "khaled.ismail@fci.helwan.edu.eg",
+    "isOpenToJoin": true,
+    "maxMembers": 6
+  },
+  {
+    "name": "Delta Team",
+    "teamDepartment": "ai",
+    "techStack": [ "TensorFlow", "Keras" ],
+    "membersEmails": [ "nour.ali@fci.helwan.edu.eg", "samer.eid@fci.helwan.edu.eg" ],
+    "supervisorEmail": "hassan.adel@fci.helwan.edu.eg",
+    "isOpenToJoin": true,
+    "maxMembers": 6
+  },
+  {
+    "name": "Epsilon Team",
+    "teamDepartment": "cs",
+    "techStack": [ "C#", "ASP.NET" ],
+    "membersEmails": [ "rania.mohamed@fci.helwan.edu.eg", "omar.salem@fci.helwan.edu.eg" ],
+    "supervisorEmail": "youssef.ragab@fci.helwan.edu.eg",
+    "isOpenToJoin": true,
+    "maxMembers": 6
+  },
+  {
+    "name": "Zeta Team",
+    "teamDepartment": "is",
+    "techStack": [ "Node.js", "Express" ],
+    "membersEmails": [ "laila.fawzy@fci.helwan.edu.eg" ],
+    "supervisorEmail": "fatma.moharram@fci.helwan.edu.eg",
+    "isOpenToJoin": true,
+    "maxMembers": 6
+  },
+  {
+    "name": "Eta Team",
+    "teamDepartment": "it",
+    "techStack": [ "Python", "Pandas" ],
+    "membersEmails": [ "hadi.nasser@fci.helwan.edu.eg", "sara.taha@fci.helwan.edu.eg", "ahmed.zaki@fci.helwan.edu.eg", "maha.reda@fci.helwan.edu.eg", "kareem.youssef@fci.helwan.edu.eg", "nada.saad@fci.helwan.edu.eg" ],
+    "supervisorEmail": "amr.shawky@fci.helwan.edu.eg",
+    "isOpenToJoin": false,
+    "maxMembers": 6
+  },
+  {
+    "name": "Theta Team",
+    "teamDepartment": "ai",
+    "techStack": [ "PyTorch", "Deep Learning" ],
+    "membersEmails": [ "eman.hassan@fci.helwan.edu.eg", "tamer.osman@fci.helwan.edu.eg" ],
+    "supervisorEmail": "doaa.elz@fci.helwan.edu.eg",
+    "isOpenToJoin": true,
+    "maxMembers": 6
+  },
+  {
+    "name": "Iota Team",
+    "teamDepartment": "cs",
+    "techStack": [ "Java", "Hibernate" ],
+    "membersEmails": [ "salma.abdel@fci.helwan.edu.eg", "zain.khaled@fci.helwan.edu.eg" ],
+    "supervisorEmail": "omar.fathy@fci.helwan.edu.eg",
+    "isOpenToJoin": true,
+    "maxMembers": 6
+  },
+  {
+    "name": "Kappa Team",
+    "teamDepartment": "is",
+    "techStack": [ "Vue.js", "Frontend" ],
+    "membersEmails": [ "reem.fathy@fci.helwan.edu.eg", "basem.ali@fci.helwan.edu.eg", "dina.mohsen@fci.helwan.edu.eg" ],
+    "supervisorEmail": "laila.hassan@fci.helwan.edu.eg",
+    "isOpenToJoin": true,
+    "maxMembers": 6
+  }
+]
