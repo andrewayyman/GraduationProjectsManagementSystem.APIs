@@ -1,6 +1,7 @@
 using Domain.Entities.Identity;
 using Graduation_Project_Management.Extension;
 using Graduation_Project_Management.Hubs;
+using Graduation_Project_Management.Utilities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Repository.Identity;
@@ -76,7 +77,7 @@ namespace Graduation_Project_Management
 
 
             // Configure CORS
-        
+
 
             // Configure the HTTP request pipeline.
             if ( app.Environment.IsDevelopment() )
@@ -96,13 +97,19 @@ namespace Graduation_Project_Management
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
- {
-     endpoints.MapHub<ChatHub>("/hubs/chatHub");
-     endpoints.MapHub<NotificationHub>("/hubs/notificationHub");
-     endpoints.MapControllers();
- });
+             {
+                 endpoints.MapHub<ChatHub>("/hubs/chatHub");
+                 endpoints.MapHub<NotificationHub>("/hubs/notificationHub");
+                 endpoints.MapControllers();
+             });
 
             app.MapControllers();
+
+            // Seed Data
+            using var seedScope = app.Services.CreateScope();
+            var seedServices = seedScope.ServiceProvider;
+            var seedData = seedServices.GetRequiredService<SeedData>();
+            await seedData.SeedAsync();
 
             #endregion Middlewares
 

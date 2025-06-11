@@ -61,6 +61,8 @@ namespace Graduation_Project_Management.Service
                 TeamId = student.Team.Id,
                 CreatedAt = DateTime.UtcNow,
                 Status = ProjectIdeaStatus.Pending
+
+                
             };
 
 

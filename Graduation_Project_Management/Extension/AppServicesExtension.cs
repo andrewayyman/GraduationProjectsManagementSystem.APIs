@@ -20,6 +20,8 @@ namespace Graduation_Project_Management.Extension
             Services.AddScoped(typeof(ISupervisorService), typeof(SupervisorService));
             Services.AddScoped(typeof(ITasksServices), typeof(TasksServices));
             Services.AddScoped(typeof(IMeetingService), typeof(MeetingsServices));
+            Services.AddScoped<SeedData>();
+
             Services.Configure<EmailSettings>(_configuration.GetSection("EmailSettings"));
             Services.AddTransient<IEmailSenderService, EmailSender>();
 
