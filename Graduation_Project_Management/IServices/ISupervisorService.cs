@@ -14,7 +14,7 @@ namespace Graduation_Project_Management.IServices
 
         Task<ActionResult> UpdateSupervisorProfileAsync( int id, UpdateSupervisorDto supervisorDto );
 
-        Task<ActionResult> DeleteSupervisorProfileAsync( int id );
+        Task<ActionResult> DeleteSupervisorProfileAsync( int id, ClaimsPrincipal user );
 
         Task<ActionResult> GetPendingRequestsAsync( ClaimsPrincipal user );
 

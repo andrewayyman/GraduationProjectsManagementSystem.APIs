@@ -187,20 +187,69 @@ namespace Graduation_Project_Management.Service
 
         #region DeleteSupervisor Service
 
-        public async Task<ActionResult> DeleteSupervisorProfileAsync( int id )
+        public async Task<ActionResult> DeleteSupervisorProfileAsync( int id, ClaimsPrincipal user )
         {
-            var supervisor = await _supervisorRepo.GetByIdAsync(id);
+            var userEmail = user.FindFirstValue(ClaimTypes.Email);
+            var roles = user.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
 
-            // check if the supervisor exists
+            var supervisorRepo = _unitOfWork.GetRepository<Supervisor>();
+            var teamRepo = _unitOfWork.GetRepository<Team>();
+            var ideaRepo = _unitOfWork.GetRepository<ProjectIdea>();
+
+            var supervisor = await supervisorRepo.GetAllAsync()
+                .Where(s => s.Id == id)
+                .Include(s => s.SupervisedTeams)
+                    .ThenInclude(t => t.TeamMembers)
+                .Include(s => s.SupervisedTeams)
+                    .ThenInclude(t => t.ProjectIdeas)
+                .FirstOrDefaultAsync();
+
             if ( supervisor == null )
-                return new NotFoundObjectResult(new ApiResponse(404, "There is no any supervisors with this id "));
+                return new NotFoundObjectResult(new ApiResponse(404, "Supervisor Not Found"));
 
-            // delete the supervisor
-            await _supervisorRepo.DeleteAsync(supervisor);
+            // Allow only the supervisor themselves or an Admin
+            if ( supervisor.Email != userEmail && !roles.Contains("Admin") )
+                return new ObjectResult(new ApiResponse(403, "Unauthorized to delete this supervisor."));
+
+            var appUser = await _userManager.FindByEmailAsync(supervisor.Email);
+            if ( appUser == null )
+                return new NotFoundObjectResult(new ApiResponse(404, "User not found"));
+
+            // If the supervisor is assigned to teams
+            if ( supervisor.SupervisedTeams != null && supervisor.SupervisedTeams.Any() )
+            {
+                foreach ( var team in supervisor.SupervisedTeams.ToList() )
+                {
+                    // If the team has no members left or only the supervisor, delete the team and its ideas
+                    if ( !team.TeamMembers.Any() || ( team.TeamMembers.Count == 1 && team.TeamMembers.All(m => m.Id == supervisor.Id) ) )
+                    {
+                        // Delete all project ideas
+                        if ( team.ProjectIdeas != null && team.ProjectIdeas.Any() )
+                        {
+                            foreach ( var idea in team.ProjectIdeas )
+                            {
+                                await ideaRepo.DeleteAsync(idea);
+                            }
+                        }
+                        // Delete the team
+                        await teamRepo.DeleteAsync(team);
+                    }
+                    else
+                    {
+                        // Otherwise, remove the supervisor from the team (set SupervisorId to null)
+                        team.SupervisorId = null;
+                    }
+                }
+            }
+
+            // Delete the supervisor and the identity user
+            await supervisorRepo.DeleteAsync(supervisor);
+            var result = await _userManager.DeleteAsync(appUser);
+            if ( !result.Succeeded )
+                return new BadRequestObjectResult(new ApiResponse(400, "Failed to delete user from Identity."));
+
             await _unitOfWork.SaveChangesAsync();
-            return new OkObjectResult(new { message = "Profile Deleted Successfully" });
-        
-        
+            return new OkObjectResult(new ApiResponse(200, "Supervisor, user, and possibly teams deleted successfully."));
         }
 
         #endregion DeleteSupervisor Service
@@ -276,7 +325,9 @@ namespace Graduation_Project_Management.Service
                 t.IsOpenToJoin,
                 t.MaxMembers,
                 TechStack = string.Join(", ", t.TechStack ?? new List<string>()),
-                TeamMembers = t.TeamMembers?.Select(tm => new { tm.Id, FullName = $"{tm.FirstName} {tm.LastName}", })
+                TeamMembers = t.TeamMembers?.Select(tm => new { tm.Id, FullName = $"{tm.FirstName} {tm.LastName}", }),
+                IsCompleted = t.ProjectIdeas?.Any(pi => pi.IsCompleted) ?? false, // Check if any project idea is completed
+
             });
 
             return new OkObjectResult(response);

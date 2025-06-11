@@ -310,6 +310,7 @@ namespace Graduation_Project_Management.Service
                 ProjectIdea = projectIdea != null
                         ? new { projectIdea.Id, Title = projectIdea.Title }
                         : null,
+                RejectionReason = task.Status == TaskStatusEnum.NeedToRevise ? task.RejectionReason : null,
                 Message = "Task Retrieved Successfully"
             };
 
@@ -374,6 +375,7 @@ namespace Graduation_Project_Management.Service
                     SupervisorName = t.Supervisor != null ? $"{t.Supervisor.FirstName} {t.Supervisor.LastName}" : null,
                     AssignedStudentName = t.AssignedStudent != null ? $"{t.AssignedStudent.FirstName} {t.AssignedStudent.LastName}" : null,
                     ProjectIdeaTitle = projectIdea?.Title,
+                    RejectionReason = t.Status == TaskStatusEnum.NeedToRevise ? t.RejectionReason : null,
                     Message = "Task Retrieved Successfully"
                 };
             }).Select(t => t.Result).ToList();
@@ -426,6 +428,7 @@ namespace Graduation_Project_Management.Service
                     SupervisorName = t.Supervisor != null ? $"{t.Supervisor.FirstName} {t.Supervisor.LastName}" : null,
                     AssignedStudentName = t.AssignedStudent != null ? $"{t.AssignedStudent.FirstName} {t.AssignedStudent.LastName}" : null,
                     ProjectIdeaTitle = projectIdea?.Title,
+                    RejectionReason = t.Status == TaskStatusEnum.NeedToRevise ? t.RejectionReason : null,
                     Message = "Task Retrieved Successfully"
                 };
             }).Select(t => t.Result).ToList();
@@ -477,6 +480,7 @@ namespace Graduation_Project_Management.Service
                     SupervisorName = t.Supervisor != null ? $"{t.Supervisor.FirstName} {t.Supervisor.LastName}" : null,
                     AssignedStudentName = t.AssignedStudent != null ? $"{t.AssignedStudent.FirstName} {t.AssignedStudent.LastName}" : null,
                     ProjectIdeaTitle = projectIdea?.Title,
+                    RejectionReason = t.Status == TaskStatusEnum.NeedToRevise ? t.RejectionReason : null,
                     Message = "Task Retrieved Successfully"
                 };
             }).Select(t => t.Result).ToList();
@@ -670,6 +674,7 @@ namespace Graduation_Project_Management.Service
                     return new BadRequestObjectResult(new ApiResponse(400, "Task must be in Done status to be reviewed."));
 
                 task.Status = dto.IsApproved ? TaskStatusEnum.Completed : TaskStatusEnum.NeedToRevise;
+                task.RejectionReason = dto.IsApproved ? null : dto.RejectionReason; // Set RejectionReason if rejected
                 await _unitOfWork.SaveChangesAsync();
 
                 var projectIdea = await _unitOfWork.GetRepository<ProjectIdea>()

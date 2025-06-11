@@ -1,9 +1,8 @@
 ﻿using Graduation_Project_Management.DTOs.ProjectIdeasDTOs;
-using Graduation_Project_Management.DTOs.TeamsDTOs;
 
-namespace Graduation_Project_Management.DTOs.TeamsDtos
+namespace Graduation_Project_Management.DTOs.TeamsDTOs
 {
-    public class GetTeamByStdIdDto
+    public class GetTeamByStudentIdWithCompletionDto
     {
         public string? StudentName { get; set; }
         public int TeamId { get; set; }
@@ -14,6 +13,6 @@ namespace Graduation_Project_Management.DTOs.TeamsDtos
         public List<string>? TechStack { get; set; }
         public List<TeamDtoWithRole>? TeamMembers { get; set; }
         public List<ProjectIdeaDto> ProjectIdeas { get; set; }
-
+        public bool IsCompleted { get; set; }
     }
 }

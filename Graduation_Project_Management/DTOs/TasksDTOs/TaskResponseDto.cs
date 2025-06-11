@@ -15,6 +15,8 @@ namespace Graduation_Project_Management.DTOs.TasksDTOs
         public string AssignedStudentName { get; set; }
         public string ProjectIdeaTitle { get; set; }
 
+        public string? RejectionReason { get; set; }
+
         public string Message { get; set; }
     }
 }

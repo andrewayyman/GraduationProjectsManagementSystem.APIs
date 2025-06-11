@@ -12,6 +12,7 @@ using System.Security.Claims;
 using Domain.Enums;
 using Graduation_Project_Management.IServices;
 using Graduation_Project_Management.DTOs.ProjectIdeasDTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Graduation_Project_Management.Controllers
 {
@@ -61,11 +62,10 @@ namespace Graduation_Project_Management.Controllers
         #endregion UpdateSupervisor
 
         #region DeleteSupervisor
-
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<SupervisorDto>> Delete( int id )
-            => await _supervisorService.DeleteSupervisorProfileAsync(id);
-
+            => await _supervisorService.DeleteSupervisorProfileAsync(id, User);
         #endregion DeleteSupervisor
 
         #region GetPendingRequests

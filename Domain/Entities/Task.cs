@@ -26,6 +26,7 @@ namespace Domain.Entities
 
         public int? AssignedStudentId { get; set; }                                  // Student assigned to the task
         public Student? AssignedStudent { get; set; }
+        public string? RejectionReason { get; set; }
 
         public ICollection<TaskSubmission> Submissions { get; set; } = new List<TaskSubmission>();
     }

@@ -210,35 +210,36 @@ namespace Graduation_Project_Management.Service
 
 
         #region Get Team By StudentId
-        public async Task<IActionResult> GetTeamByStudentIdAsync(int studentId, ClaimsPrincipal user)
+        public async Task<IActionResult> GetTeamByStudentIdAsync( int studentId, ClaimsPrincipal user )
         {
             var userEmail = user.FindFirstValue(ClaimTypes.Email);
 
-
             var student = await _unitOfWork.GetRepository<Student>().GetAllAsync()
                  .Where(s => s.Id == studentId)
-                .Include(s => s.Team)
-                    .ThenInclude(t => t.TeamMembers)
-                .Include(s => s.Team)
-                    .ThenInclude(t => t.ProjectIdeas)
-                        .ThenInclude(p => p.Supervisor)
-                .FirstOrDefaultAsync();
+                 .Include(s => s.Team)
+                     .ThenInclude(t => t.TeamMembers)
+                 .Include(s => s.Team)
+                     .ThenInclude(t => t.ProjectIdeas)
+                         .ThenInclude(p => p.Supervisor)
+                 .FirstOrDefaultAsync();
 
-            if (student == null)
+            if ( student == null )
                 return new NotFoundObjectResult(new ApiResponse(404, "Student not found"));
 
             var team = student.Team;
 
-            if (team == null)
+            if ( team == null )
                 return new ObjectResult(new ApiResponse(200, "This student does not belong to any team yet"));
 
             var isStudentSelf = student.Email == userEmail;
             var isSupervisor = team.ProjectIdeas.Any(p => p.Supervisor != null && p.Supervisor.Email == userEmail);
 
-            if (!isStudentSelf && !isSupervisor)
-                return new ObjectResult(new ApiResponse(403, "You are not authorized to view this team."));
+            if ( !isStudentSelf && !isSupervisor )
+                return new UnauthorizedObjectResult(new ApiResponse(403, "You are not authorized to view this team."));
 
-            var result = new GetTeamByStdIdDto
+            var isCompleted = team.ProjectIdeas?.Any(pi => pi.IsCompleted) ?? false; // Check if any project idea is completed
+
+            var result = new GetTeamByStudentIdWithCompletionDto
             {
                 StudentName = student.FirstName + " " + student.LastName,
                 TeamId = team.Id,
@@ -255,8 +256,6 @@ namespace Graduation_Project_Management.Service
                         MainRole = m.MainRole
                     })
                     .ToList(),
-
-
                 ProjectIdeas = team.ProjectIdeas.Select(p => new ProjectIdeaDto
                 {
                     ProjectIdeaId = p.Id,
@@ -269,8 +268,9 @@ namespace Graduation_Project_Management.Service
                     {
                         SupervisorId = p.Supervisor.Id,
                         Name = p.Supervisor.FirstName + " " + p.Supervisor.LastName,
-                    } : null
-                }).ToList()
+                    } : null,
+                }).ToList(),
+                IsCompleted = isCompleted 
             };
 
             return new OkObjectResult(result);
