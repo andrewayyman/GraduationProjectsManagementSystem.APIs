@@ -172,7 +172,7 @@ namespace Graduation_Project_Management.Service
                 return new ObjectResult(new ApiResponse(403, "You are not authorized to view this team."))
                 { StatusCode = StatusCodes.Status403Forbidden };
 
-            var result = new GetTeamsDto
+            var result = new GetTeamWithRoleDto
             {
                 TeamId = team.Id,
                 Name = team.Name,
@@ -181,10 +181,11 @@ namespace Graduation_Project_Management.Service
                 TechStack = team.TechStack,
                 MembersCount = team.TeamMembers.Count,
                 TeamMembers = team.TeamMembers
-                    .Select(m => new TeamMemberDto
+                    .Select(m => new TeamDtoWithRole
                     {
                         Id = m.Id,
-                        FullName = m.FirstName + " " + m.LastName,
+                        FullName = $"{m.FirstName} {m.LastName}",
+                        MainRole = m.MainRole
                     })
                     .ToList(),
                 ProjectIdeas = team.ProjectIdeas.Select(p => new ProjectIdeaDto
