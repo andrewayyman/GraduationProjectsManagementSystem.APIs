@@ -3,6 +3,7 @@ using Domain.Repository;
 using Graduation_Project_Management.DTOs.MeetingDto;
 using Graduation_Project_Management.Errors;
 using Graduation_Project_Management.IServices;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -253,7 +254,7 @@ namespace Graduation_Project_Management.Service
                 .ToListAsync();
 
             if (meetings == null || !meetings.Any())
-                return new NotFoundObjectResult(new ApiResponse(200, "No meetings found for the specified team."));
+                return new OkObjectResult(new ApiResponse(200, "No meetings found for the specified team."));
 
             var response = meetings.Select(m => new MeetingResponseDto
             {
