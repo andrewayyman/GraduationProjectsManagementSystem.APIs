@@ -54,6 +54,16 @@ namespace Graduation_Project_Management.Controllers
 
         #endregion Get Join Requests
 
+        #region GetTeamJoinRequests
+
+        [HttpGet("Student")]
+        [Authorize(Roles = "Student")]
+        public async Task<IActionResult> GetStudentJoinRequests()
+            => await _requestService.GetStudentJoinRequestsAsync(User);
+
+
+        #endregion Get Join Requests
+
         #region RequestToSupervisor
 
         [HttpPost("RequestSupervisor")]

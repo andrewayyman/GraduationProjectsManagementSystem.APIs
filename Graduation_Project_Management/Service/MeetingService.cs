@@ -253,7 +253,7 @@ namespace Graduation_Project_Management.Service
                 .ToListAsync();
 
             if (meetings == null || !meetings.Any())
-                return new NotFoundObjectResult(new ApiResponse(404, "No meetings found for the specified team."));
+                return new NotFoundObjectResult(new ApiResponse(200, "No meetings found for the specified team."));
 
             var response = meetings.Select(m => new MeetingResponseDto
             {
