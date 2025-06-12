@@ -8,6 +8,8 @@ namespace Graduation_Project_Management.IServices
     public interface IRequestService
     {
         Task<ActionResult> GetTeamJoinRequestsAsync(ClaimsPrincipal user, int teamId);
+        Task<ActionResult> GetStudentJoinRequestsAsync(ClaimsPrincipal user);
+
         Task<ActionResult> RespondToJoinRequestAsync(ClaimsPrincipal user, int requestId, string decision);
 
         Task<ActionResult> RequestToJoinTeamAsync(ClaimsPrincipal user, TeamJoinRequestDto model);

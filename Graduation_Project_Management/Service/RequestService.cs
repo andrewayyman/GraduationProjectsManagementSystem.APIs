@@ -2,6 +2,7 @@
 using Domain.Enums;
 using Domain.Repository;
 using Graduation_Project_Management.DTOs.ProjectIdeasDTOs;
+using Graduation_Project_Management.DTOs.StudentDTOs;
 using Graduation_Project_Management.DTOs.TeamsDTOs;
 using Graduation_Project_Management.Errors;
 using Graduation_Project_Management.Hubs;
@@ -192,6 +193,17 @@ namespace Graduation_Project_Management.Service
                     request.Status = JoinRequestStatus.Accepted;
                     request.Team.TeamMembers.Add(request.Student);
 
+                    // Remove other pending requests for the same student
+                    var pendingRequests = await _unitOfWork.GetRepository<TeamJoinRequest>()
+                        .GetAllAsync()
+                        .Where(r => r.StudentId == request.StudentId && r.Status == JoinRequestStatus.Pending && r.Id != request.Id)
+                        .ToListAsync();
+
+                    foreach (var pendingRequest in pendingRequests)
+                    {
+                        _unitOfWork.GetRepository<TeamJoinRequest>().DeleteAsync(pendingRequest);
+                    }
+
                     // Update team status if full
                     if ( request.Team.TeamMembers.Count >= request.Team.MaxMembers )
                         request.Team.IsOpenToJoin = false;
@@ -312,6 +324,38 @@ namespace Graduation_Project_Management.Service
             return new OkObjectResult(requests);
         }
         #endregion
+
+        #region GetStudentJoinRequests
+        public async Task<ActionResult> GetStudentJoinRequestsAsync(ClaimsPrincipal user)
+        {
+            var userEmail = user.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(userEmail))
+                return new UnauthorizedObjectResult(new ApiResponse(401, "User email not found in claims."));
+
+            var student = await _unitOfWork.GetRepository<Student>()
+                .GetAllAsync()
+                .Include(s => s.JoinRequests)
+                    .ThenInclude(r => r.Team)
+                .Include(s => s.User)
+                .FirstOrDefaultAsync(s => s.Email == userEmail);
+
+            if (student == null)
+                return new NotFoundObjectResult(new ApiResponse(404, "Student profile not found."));
+
+            var requests = student.JoinRequests?.Select(r => new StudentJoinRequestResponseDto
+            {
+                RequestId = r.Id,
+                TeamId = r.TeamId,
+                TeamName = r.Team?.Name,
+                Message = r.Message,
+                Status = r.Status.ToString(),
+                CreatedAt = r.CreatedAt.ToString("yyyy-MM-dd")
+            }).ToList() ?? new List<StudentJoinRequestResponseDto>();
+
+            return new OkObjectResult(requests);
+        }
+        #endregion
+
 
         #region RequestSupervisor
         public async Task<IActionResult> RequestSupervisorAsync(ClaimsPrincipal user, SendProjectIdeaRequestDto dto)
