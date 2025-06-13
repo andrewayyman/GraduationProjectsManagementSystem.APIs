@@ -9,6 +9,7 @@
         public string? Objectives { get; set; }
         public string? Comment { get; set; }
         public string? TeamName { get; set; }
+        public int? TeamId { get; set; }
         public string? SupervisorName { get; set; }
         public string Message { get; set; }
     }

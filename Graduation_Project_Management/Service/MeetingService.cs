@@ -55,6 +55,7 @@ namespace Graduation_Project_Management.Service
                     Objectives = m.Objectives,
                     Comment = m.Comment,
                     TeamName = m.Team?.Name,
+                    TeamId=m.Team?.Id,
                     SupervisorName = m.Supervisor != null ? $"{m.Supervisor.FirstName} {m.Supervisor.LastName}" : null,
                     Message = "Meeting Retrieved Successfully"
                 };
@@ -358,6 +359,7 @@ namespace Graduation_Project_Management.Service
                 Objectives = m.Objectives,
                 Comment = m.Comment,
                 TeamName = m.Team?.Name,
+                TeamId= m.Team?.Id,
                 SupervisorName = m.Supervisor != null ? $"{m.Supervisor.FirstName} {m.Supervisor.LastName}" : null,
                 Message = "Meeting Retrieved Successfully"
             }).ToList();
