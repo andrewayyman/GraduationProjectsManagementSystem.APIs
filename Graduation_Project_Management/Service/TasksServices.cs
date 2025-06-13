@@ -12,6 +12,8 @@ using Graduation_Project_Management.Errors;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System.Globalization;
+using Graduation_Project_Management.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Graduation_Project_Management.Service
 {
@@ -22,12 +24,15 @@ namespace Graduation_Project_Management.Service
         private readonly ApplicationDbContext _context;
         private readonly IGenericRepository<Task> _tasksRepo;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IHubContext<NotificationHub> _notificationHub;
 
-        public TasksServices( ApplicationDbContext context, IGenericRepository<Task> tasksRepo, IUnitOfWork unitOfWork )
+
+        public TasksServices( ApplicationDbContext context, IGenericRepository<Task> tasksRepo, IUnitOfWork unitOfWork,IHubContext<NotificationHub> notificationHub)
         {
             _context = context;
             _tasksRepo = tasksRepo;
             _unitOfWork = unitOfWork;
+            _notificationHub = notificationHub;
         }
 
         #endregion Dependencies
@@ -144,6 +149,54 @@ namespace Graduation_Project_Management.Service
 
             await _unitOfWork.GetRepository<Task>().AddAsync(task);
             await _unitOfWork.SaveChangesAsync();
+
+
+
+            // Send notification to assigned student (if assigned)
+            if (task.AssignedStudentId.HasValue)
+            {
+                var assignedStudentToTask = await _unitOfWork.GetRepository<Student>()
+                    .GetAllAsync()
+                    .FirstOrDefaultAsync(s => s.Id == task.AssignedStudentId);
+
+                if (assignedStudentToTask != null)
+                {
+                    var title = "New Task Assigned";
+                    var content = $"A new task '{task.Title}' has been assigned to you by {supervisor.FirstName} {supervisor.LastName} in team '{team.Name}'.";
+                    var notification = new Notification
+                    {
+                        Message = content,
+                        RecipientId = assignedStudentToTask.UserId,
+                        Type = NotificationType.TaskAssignment,
+                        Status = NotificationStatus.Unread,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    // Log notification details
+                    Console.WriteLine($"Preparing notification: RecipientId={assignedStudentToTask.UserId}, Title={title}, Content={content}");
+
+                    // Save notification to database
+                    await _unitOfWork.GetRepository<Notification>().AddAsync(notification);
+                    Console.WriteLine($"Notification saved for RecipientId={assignedStudentToTask.UserId}");
+
+                    // Send notification via SignalR
+                    var connectionId = NotificationHub.GetConnectionId(assignedStudentToTask.UserId);
+                    if (connectionId != null)
+                    {
+                        await _notificationHub.Clients.Client(connectionId)
+                            .SendAsync("ReceiveNotification", title, content);
+                        Console.WriteLine($"Notification sent to RecipientId={assignedStudentToTask.UserId}, ConnectionId={connectionId}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"No active connection found for RecipientId={assignedStudentToTask.UserId}");
+                    }
+                }
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+
+
 
             // Prepare Response
             var assignedStudent = task.AssignedStudent;
@@ -780,6 +833,42 @@ namespace Graduation_Project_Management.Service
             try
             {
                 await _context.SaveChangesAsync();
+                // Send notification to supervisor
+                if (task.Supervisor != null)
+                {
+                    var title = "Task Submission Received";
+                    var content = $"The task '{task.Title}' has been submitted by {student.FirstName} {student.LastName}.";
+                    var notification = new Notification
+                    {
+                        Message = content,
+                        RecipientId = task.Supervisor.UserId,
+                        Type = NotificationType.TaskSubmission,
+                        Status = NotificationStatus.Unread,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    // Log notification details
+                    Console.WriteLine($"Preparing notification: RecipientId={task.Supervisor.UserId}, Title={title}, Content={content}");
+
+                    // Save notification to database
+                    await _context.Notifications.AddAsync(notification);
+                    Console.WriteLine($"Notification saved for RecipientId={task.Supervisor.UserId}");
+
+                    // Send notification via SignalR
+                    var connectionId = NotificationHub.GetConnectionId(task.Supervisor.UserId);
+                    if (connectionId != null)
+                    {
+                        await _notificationHub.Clients.Client(connectionId)
+                            .SendAsync("ReceiveNotification", title, content);
+                        Console.WriteLine($"Notification sent to RecipientId={task.Supervisor.UserId}, ConnectionId={connectionId}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"No active connection found for RecipientId={task.Supervisor.UserId}");
+                    }
+
+                    await _context.SaveChangesAsync();
+                }
             }
             catch ( DbUpdateException ex )
             {

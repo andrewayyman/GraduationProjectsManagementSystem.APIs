@@ -2,9 +2,11 @@
 using Domain.Repository;
 using Graduation_Project_Management.DTOs.MeetingDto;
 using Graduation_Project_Management.Errors;
+using Graduation_Project_Management.Hubs;
 using Graduation_Project_Management.IServices;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -13,12 +15,18 @@ namespace Graduation_Project_Management.Service
 
     public class MeetingsServices : IMeetingService
     {
+        #region Dependencies
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IHubContext<NotificationHub> _notificationHub;
 
-        public MeetingsServices(IUnitOfWork unitOfWork)
+
+        public MeetingsServices(IUnitOfWork unitOfWork, IHubContext<NotificationHub> notificationHub)
         {
             _unitOfWork = unitOfWork;
+            _notificationHub = notificationHub;
+
         }
+        #endregion
 
         #region GetAllMeetings Service
         public async Task<ActionResult> GetAllMeetingsAsync(ClaimsPrincipal user)
@@ -79,6 +87,7 @@ namespace Graduation_Project_Management.Service
             // Validate Team
             var team = await _unitOfWork.GetRepository<Team>()
                 .GetAllAsync()
+                .Include(t => t.TeamMembers)
                 .FirstOrDefaultAsync(t => t.Id == dto.TeamId && t.SupervisorId == supervisor.Id);
             if (team == null)
                 return new NotFoundObjectResult(new ApiResponse(404, "Invalid team ID or team does not belong to the current supervisor."));
@@ -95,8 +104,50 @@ namespace Graduation_Project_Management.Service
                 SupervisorId = supervisor.Id
             };
 
+
             await _unitOfWork.GetRepository<Meeting>().AddAsync(meeting);
             await _unitOfWork.SaveChangesAsync();
+
+            // Send notification to team members
+            if (team.TeamMembers != null && team.TeamMembers.Any())
+            {
+                foreach (var member in team.TeamMembers)
+                {
+                    var title = "New Meeting Scheduled";
+                    var content = $"A new meeting '{meeting.Title}' has been scheduled by {supervisor.FirstName} {supervisor.LastName} for team '{team.Name}' on {meeting.ScheduledAt}.";
+                    var notification = new Notification
+                    {
+                        Message = content,
+                        RecipientId = member.UserId,
+                        Type = NotificationType.MeetingScheduled,
+                        Status = NotificationStatus.Unread,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    // Log notification details
+                    Console.WriteLine($"Preparing notification: RecipientId={member.UserId}, Title={title}, Content={content}");
+
+                    // Save notification to database
+                    await _unitOfWork.GetRepository<Notification>().AddAsync(notification);
+                    Console.WriteLine($"Notification saved for RecipientId={member.UserId}");
+
+                    // Send notification via SignalR
+                    var connectionId = NotificationHub.GetConnectionId(member.UserId);
+                    if (connectionId != null)
+                    {
+                        await _notificationHub.Clients.Client(connectionId)
+                            .SendAsync("ReceiveNotification", title, content);
+                        Console.WriteLine($"Notification sent to RecipientId={member.UserId}, ConnectionId={connectionId}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"No active connection found for RecipientId={member.UserId}");
+                    }
+                }
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+
 
             // Prepare Response
             var response = new MeetingResponseDto
@@ -114,6 +165,7 @@ namespace Graduation_Project_Management.Service
 
             return new OkObjectResult(response);
         }
+
         #endregion CreateMeeting Service
 
         #region UpdateMeeting Service
