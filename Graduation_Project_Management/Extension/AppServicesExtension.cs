@@ -22,7 +22,7 @@ namespace Graduation_Project_Management.Extension
             Services.AddScoped(typeof(IMeetingService), typeof(MeetingsServices));
             Services.AddScoped(typeof(INotificationService), typeof(NotificationsService));
 
-            //Services.AddScoped<SeedData>();
+            Services.AddScoped<SeedData>();
 
             Services.Configure<EmailSettings>(_configuration.GetSection("EmailSettings"));
             Services.AddTransient<IEmailSenderService, EmailSender>();

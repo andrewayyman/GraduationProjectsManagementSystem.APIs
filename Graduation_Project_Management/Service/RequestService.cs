@@ -69,7 +69,7 @@ namespace Graduation_Project_Management.Service
             if ( team.TeamMembers?.Count >= team.MaxMembers )
                 return new BadRequestObjectResult(new ApiResponse(400, "Team has reached its maximum member limit."));
             if ( team.JoinRequests?.Any(r => r.StudentId == student.Id && r.Status == JoinRequestStatus.Pending) == true )
-                return new BadRequestObjectResult(new ApiResponse(400, "You already have a pending request to this team."));
+                return new OkObjectResult(new ApiResponse(200, "You already have a pending request to this team."));
 
 
 
@@ -398,11 +398,11 @@ namespace Graduation_Project_Management.Service
                 return new BadRequestObjectResult(new ApiResponse(400, "Project idea already has a supervisor."));
 
             // Check for existing pending request
-            //var existingRequest = await _unitOfWork.GetRepository<ProjectIdeaRequest>()
-            //    .GetAllAsync()
-            //    .AnyAsync(r => r.ProjectIdeaId == dto.ProjectIdeaId && r.Status == ProjectIdeaStatus.Pending);
-            //if ( existingRequest )
-            //    return new BadRequestObjectResult(new ApiResponse(400, "A pending supervisor request already exists for this project idea."));
+            var existingRequest = await _unitOfWork.GetRepository<ProjectIdeaRequest>()
+                .GetAllAsync()
+                .AnyAsync(r => r.ProjectIdeaId == dto.ProjectIdeaId && r.Status == ProjectIdeaStatus.Pending);
+            if ( existingRequest )
+                return new OkObjectResult(new ApiResponse(200, "A pending supervisor request already exists for this project idea."));
 
 
 

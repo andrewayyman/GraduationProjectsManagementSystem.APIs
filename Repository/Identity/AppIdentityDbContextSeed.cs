@@ -25,12 +25,12 @@ namespace Repository.Identity
                 {
                     FirstName = "Super",
                     LastName = "Admin",
-                    Email = "SuperAdmin@Helwan.com",
+                    Email = "superadmin@fci.helwan.edu.eg",
                     UserName = "Admin",
-                    PhoneNumber = "01111111111"
+                    PhoneNumber = "01206741192"
                 };
 
-                await userManager.CreateAsync(User, "Pa$$wOrd");
+                await userManager.CreateAsync(User, "Pa$$w0rd");
                 await userManager.AddToRoleAsync(User, "Admin");
             }
         }
