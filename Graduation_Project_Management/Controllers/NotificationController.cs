@@ -23,6 +23,14 @@ namespace Graduation_Project_Management.Controllers
             var result = await _notificationService.GetUserNotificationsAsync(User);
             return result;
         }
+
+        [HttpPut("{notificationId}")]
+        public async Task<ActionResult> MarkNotificationAsRead(int notificationId)
+        {
+            var result = await _notificationService.MarkNotificationAsReadAsync(notificationId, User);
+            return result;
+        }
+
     }
 }
 

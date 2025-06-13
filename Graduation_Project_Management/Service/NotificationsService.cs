@@ -51,6 +51,39 @@ namespace Graduation_Project_Management.Service
 
             return new OkObjectResult(result);
         }
+        public async Task<ActionResult> MarkNotificationAsReadAsync(int notificationId, ClaimsPrincipal user)
+        {
+            var userEmail = user.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(userEmail))
+                return new UnauthorizedObjectResult(new ApiResponse(401, "User email not found in claims."));
 
+            // Get the user by email
+            var appUser = await _unitOfWork.GetRepository<AppUser>()
+                .GetAllAsync()
+                .FirstOrDefaultAsync(u => u.Email == userEmail);
+
+            if (appUser == null)
+                return new NotFoundObjectResult(new ApiResponse(404, "User not found."));
+
+            // Get the notification
+            var notification = await _unitOfWork.GetRepository<Notification>()
+                .GetAllAsync()
+                .FirstOrDefaultAsync(n => n.Id == notificationId && n.RecipientId == appUser.Id);
+
+            if (notification == null)
+                return new OkObjectResult(new ApiResponse(404, "Notification not found "));
+
+            // Update notification status
+            if (notification.Status != NotificationStatus.Read)
+            {
+                notification.Status = NotificationStatus.Read;
+                await _unitOfWork.GetRepository<Notification>().UpdateAsync(notification);
+                await _unitOfWork.SaveChangesAsync();
+            }
+
+            return new OkObjectResult(new ApiResponse(200, "Notification marked as read."));
+        }
     }
+
 }
+
