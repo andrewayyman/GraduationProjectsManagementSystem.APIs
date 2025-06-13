@@ -11,7 +11,11 @@ namespace Domain.Entities
     {
         JoinRequest,
         JoinRequestResponse,
-        ProjectIdeaRequest
+        ProjectIdeaRequest,
+        TaskAssignment,
+        TaskSubmission,
+        MeetingScheduled
+
     }
     public enum NotificationStatus
     {
