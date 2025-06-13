@@ -105,11 +105,11 @@ namespace Graduation_Project_Management
 
             app.MapControllers();
 
-            // Seed Data
-            using var seedScope = app.Services.CreateScope();
-            var seedServices = seedScope.ServiceProvider;
-            var seedData = seedServices.GetRequiredService<SeedData>();
-            await seedData.SeedAsync();
+            //// Seed Data
+            //using var seedScope = app.Services.CreateScope();
+            //var seedServices = seedScope.ServiceProvider;
+            //var seedData = seedServices.GetRequiredService<SeedData>();
+            //await seedData.SeedAsync();
 
             #endregion Middlewares
 
