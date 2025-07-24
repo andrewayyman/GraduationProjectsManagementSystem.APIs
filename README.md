@@ -1,4 +1,4 @@
-# 🎓 Graduation Projects Management System (GPMS) – Easy Grads
+# 🎓 Graduation Projects Management System – Easy Grads
 
 A full-stack web-based platform built for **Helwan University – Information Systems Department** to manage the full cycle of graduation projects. The system facilitates communication and collaboration between **students**, **supervisors**, and **admins**, providing seamless team formation, task tracking, supervision, and AI-based support.
 
