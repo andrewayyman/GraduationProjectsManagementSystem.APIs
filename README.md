@@ -74,9 +74,9 @@ A full-stack web-based platform built for **Helwan University – Information Sy
 
 <img width="940" height="419" alt="image" src="https://github.com/user-attachments/assets/3e8d1be3-01b0-4f76-ab7f-5abcafee1e20" />
 
-<img width="940" height="419" alt="image" src="https://github.com/user-attachments/assets/07d41071-fe84-4f7b-8a30-27dd008b3a7a" />
+<img width="940" height="447" alt="image" src="https://github.com/user-attachments/assets/125bdd94-e6dd-49e5-822e-bc47595200a9" />
 
-<img width="940" height="419" alt="image" src="https://github.com/user-attachments/assets/e6f0ec45-02be-402b-baa6-c40078b8a378" />
+<img width="940" height="441" alt="image" src="https://github.com/user-attachments/assets/541c83ec-2bb3-4bf0-9e8f-06ab4f1143d2" />
 
 <img width="940" height="445" alt="image" src="https://github.com/user-attachments/assets/31fa4688-40ee-4c2e-b77c-0062279009e6" />
 
